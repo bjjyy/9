@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>微信白色聊天框 OCR - UC修正版</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:10px;background:#f5f5f5;font-family:Arial,"Microsoft YaHei",sans-serif;color:#222}
+.wrap{max-width:720px;margin:auto}
+h2{font-size:18px;margin:4px 0 10px}
+.card{background:#fff;border-radius:10px;padding:10px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+button,.pick{border:0;border-radius:8px;padding:10px 13px;font-size:15px;color:#fff}
+.pick{background:#1677ff;display:inline-block}
+button{background:#666}
+input[type=file]{position:absolute;left:-9999px}
+#status{font-size:13px;line-height:1.5;color:#666;margin:8px 0;word-break:break-word}
+textarea{width:100%;min-height:410px;border:1px solid #ccc;border-radius:8px;padding:10px;font-size:17px;line-height:1.5}
+.tip{font-size:12px;color:#777;line-height:1.45;margin-top:8px}
+canvas{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h2>微信白色聊天框 OCR（UC修正版）</h2>
+<div class="card">
+<div class="row">
+<label class="pick" for="files">选择微信截图</label>
+<input id="files" type="file" accept="image/*" multiple>
+<button id="copy">复制文字</button>
+<button id="clear">清空</button>
+</div>
+<div id="status">请选择微信截图。首次使用需要联网加载 PP-OCRv5 模型。</div>
+<textarea id="output" placeholder="只显示左侧白色聊天框文字"></textarea>
+<div class="tip">本版改为官方 @paddleocr/paddleocr-js 包，并用动态加载方式兼容 UC。识别输入会先转换成 Blob，再交给 PP-OCRv5。</div>
+</div>
+</div>
+<canvas id="src"></canvas>
+<canvas id="crop"></canvas>
+
+<script>
+(function(){
+var filesEl=document.getElementById('files');
+var output=document.getElementById('output');
+var statusEl=document.getElementById('status');
+var src=document.getElementById('src');
+var crop=document.getElementById('crop');
+var ocrPromise=null;
+
+function status(s){ statusEl.textContent=s; }
+
+function loadOCR(){
+  if(ocrPromise) return ocrPromise;
+  status('正在加载官方 PP-OCRv5 模型，请稍候…');
+  ocrPromise=(new Function('return import("https://cdn.jsdelivr.net/npm/@paddleocr/paddleocr-js/+esm")'))()
+    .then(function(mod){
+      if(!mod || !mod.PaddleOCR) throw new Error('PaddleOCR 模块未找到');
+      return mod.PaddleOCR.create({
+        lang:'ch',
+        ocrVersion:'PP-OCRv5',
+        textDetectionBatchSize:1,
+        textRecognitionBatchSize:4,
+        ortOptions:{
+          backend:'wasm',
+          wasmPaths:'https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/'
+        }
+      });
+    }).catch(function(e){
+      ocrPromise=null;
+      throw e;
+    });
+  return ocrPromise;
+}
+
+function readImage(file){
+  return new Promise(function(resolve,reject){
+    var r=new FileReader();
+    r.onload=function(){
+      var img=new Image();
+      img.onload=function(){resolve(img)};
+      img.onerror=function(){reject(new Error('图片读取失败'))};
+      img.src=r.result;
+    };
+    r.onerror=function(){reject(new Error('图片读取失败'))};
+    r.readAsDataURL(file);
+  });
+}
+
+function draw(img){
+  var w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;
+  src.width=w;src.height=h;
+  var ctx=src.getContext('2d',{willReadFrequently:true});
+  ctx.drawImage(img,0,0,w,h);
+  return {w:w,h:h,ctx:ctx};
+}
+
+function findWhiteBubbles(info){
+  var W=info.w,H=info.h,ctx=info.ctx;
+  var data=ctx.getImageData(0,0,W,H).data;
+  var step=Math.max(2,Math.round(W/360));
+  var sw=Math.ceil(W/step),sh=Math.ceil(H/step);
+  var mask=new Uint8Array(sw*sh),seen=new Uint8Array(sw*sh),q=new Int32Array(sw*sh);
+  var sx,sy,x,y,p,r,g,b,max,min;
+
+  for(sy=0;sy<sh;sy++){
+    y=Math.min(H-1,sy*step);
+    for(sx=0;sx<sw;sx++){
+      x=Math.min(W-1,sx*step); p=(y*W+x)*4;
+      r=data[p];g=data[p+1];b=data[p+2];
+      max=Math.max(r,g,b);min=Math.min(r,g,b);
+      if(r>=235&&g>=235&&b>=235&&max-min<=18) mask[sy*sw+sx]=1;
+    }
+  }
+
+  var boxes=[];
+  for(sy=0;sy<sh;sy++)for(sx=0;sx<sw;sx++){
+    var root=sy*sw+sx;
+    if(!mask[root]||seen[root])continue;
+    var head=0,tail=0,cnt=0,minx=sx,maxx=sx,miny=sy,maxy=sy;
+    q[tail++]=root;seen[root]=1;
+    while(head<tail){
+      var id=q[head++],qx=id%sw,qy=Math.floor(id/sw),n;
+      cnt++;
+      if(qx<minx)minx=qx;if(qx>maxx)maxx=qx;
+      if(qy<miny)miny=qy;if(qy>maxy)maxy=qy;
+      if(qx>0){n=id-1;if(mask[n]&&!seen[n]){seen[n]=1;q[tail++]=n}}
+      if(qx+1<sw){n=id+1;if(mask[n]&&!seen[n]){seen[n]=1;q[tail++]=n}}
+      if(qy>0){n=id-sw;if(mask[n]&&!seen[n]){seen[n]=1;q[tail++]=n}}
+      if(qy+1<sh){n=id+sw;if(mask[n]&&!seen[n]){seen[n]=1;q[tail++]=n}}
+    }
+    var bx=minx*step,by=miny*step,bw=Math.min(W-bx,(maxx-minx+1)*step),bh=Math.min(H-by,(maxy-miny+1)*step);
+    var area=bw*bh,fill=cnt/((maxx-minx+1)*(maxy-miny+1));
+    if(bw>=60&&bh>=25&&area>=1800&&area<W*H*.38&&by>H*.05&&by<H*.96&&bx<W*.60&&bx+bw<W*.93&&fill>.28){
+      var pad=Math.max(6,Math.round(Math.min(bw,bh)*.09));
+      var px=Math.max(0,bx-pad),py=Math.max(0,by-pad);
+      boxes.push({x:px,y:py,w:Math.min(W-px,bw+pad*2),h:Math.min(H-py,bh+pad*2)});
+    }
+  }
+  boxes.sort(function(a,b){return a.y-b.y||a.x-b.x});
+  var clean=[];
+  for(var i=0;i<boxes.length;i++){
+    var bb=boxes[i],dup=false;
+    for(var j=0;j<clean.length;j++){
+      var aa=clean[j];
+      var ix=Math.max(0,Math.min(aa.x+aa.w,bb.x+bb.w)-Math.max(aa.x,bb.x));
+      var iy=Math.max(0,Math.min(aa.y+aa.h,bb.y+bb.h)-Math.max(aa.y,bb.y));
+      if(ix*iy>Math.min(aa.w*aa.h,bb.w*bb.h)*.70){dup=true;break}
+    }
+    if(!dup)clean.push(bb);
+  }
+  return clean;
+}
+
+function cropBlob(box,scale){
+  return new Promise(function(resolve,reject){
+    var w=Math.max(1,Math.round(box.w*scale)),h=Math.max(1,Math.round(box.h*scale));
+    crop.width=w;crop.height=h;
+    var c=crop.getContext('2d');
+    c.fillStyle='#fff';c.fillRect(0,0,w,h);
+    c.imageSmoothingEnabled=true;
+    if('imageSmoothingQuality' in c)c.imageSmoothingQuality='high';
+    c.drawImage(src,box.x,box.y,box.w,box.h,0,0,w,h);
+    if(crop.toBlob){
+      crop.toBlob(function(blob){
+        if(blob)resolve(blob);else reject(new Error('图片转换失败'));
+      },'image/png');
+    }else{
+      try{
+        var data=crop.toDataURL('image/png');
+        var parts=data.split(','),bin=atob(parts[1]),arr=new Uint8Array(bin.length);
+        for(var i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
+        resolve(new Blob([arr],{type:'image/png'}));
+      }catch(e){reject(e)}
+    }
+  });
+}
+
+function getText(res){
+  var items=(res&&res.items)||[];
+  items=items.slice().sort(function(a,b){
+    var ap=a.poly||[[0,0]],bp=b.poly||[[0,0]];
+    var ay=ap[0]?ap[0][1]:0,by=bp[0]?bp[0][1]:0;
+    if(Math.abs(ay-by)>10)return ay-by;
+    return (ap[0]?ap[0][0]:0)-(bp[0]?bp[0][0]:0);
+  });
+  var out=[];
+  for(var i=0;i<items.length;i++){
+    var t=(items[i].text||'').trim();
+    if(t)out.push(t);
+  }
+  return out.join('\n');
+}
+
+function recognizeBubble(ocr,box,i,total){
+  var scales=[2.2,3.0],best='',bestScore=-1;
+  function run(k){
+    if(k>=scales.length)return Promise.resolve(best);
+    status('正在识别白色聊天框 '+(i+1)+'/'+total+'（'+(k+1)+'/2）…');
+    return cropBlob(box,scales[k]).then(function(blob){
+      return ocr.predict(blob,{
+        textDetLimitType:'min',
+        textDetLimitSideLen:960,
+        textDetMaxSideLimit:1600,
+        textDetThresh:.25,
+        textDetBoxThresh:.42,
+        textDetUnclipRatio:1.5,
+        textRecScoreThresh:.20
+      });
+    }).then(function(results){
+      var res=results&&results[0]?results[0]:null;
+      var text=getText(res),items=res&&res.items?res.items:[];
+      var score=0;
+      for(var z=0;z<items.length;z++)score+=Number(items[z].score||0);
+      score=items.length?score/items.length:0;
+      if(text&&score>bestScore){best=text;bestScore=score}
+      if(best&&score>=.94)return best;
+      return run(k+1);
+    });
+  }
+  return run(0);
+}
+
+function recognizeFile(file,fi,totalFiles){
+  var boxes,ocr;
+  return readImage(file).then(function(img){
+    boxes=findWhiteBubbles(draw(img));
+    if(!boxes.length)throw new Error('没有检测到左侧白色聊天框');
+    return loadOCR();
+  }).then(function(o){
+    ocr=o;
+    var parts=[],i=0;
+    function next(){
+      if(i>=boxes.length)return Promise.resolve(parts.join('\n'));
+      return recognizeBubble(ocr,boxes[i],i,boxes.length).then(function(t){
+        if(t)parts.push(t);i++;return next();
+      });
+    }
+    return next();
+  });
+}
+
+filesEl.onchange=function(){
+  var fs=filesEl.files;if(!fs||!fs.length)return;
+  output.value='';var all=[],i=0;
+  function next(){
+    if(i>=fs.length){
+      output.value=all.join('\n');
+      status('完成：只提取左侧白色聊天框，共 '+fs.length+' 张图片。');
+      return;
+    }
+    status('正在处理第 '+(i+1)+'/'+fs.length+' 张图片…');
+    recognizeFile(fs[i],i,fs.length).then(function(t){
+      if(t)all.push(t);i++;next();
+    }).catch(function(e){
+      console.error(e);
+      status('识别失败：'+(e&&e.message?e.message:String(e))+'。请把这一行错误文字发给我。');
+    });
+  }
+  next();
+};
+
+document.getElementById('copy').onclick=function(){
+  if(!output.value)return;
+  output.focus();output.select();
+  try{document.execCommand('copy');status('已复制。')}catch(e){status('请长按结果框复制。')}
+};
+document.getElementById('clear').onclick=function(){
+  filesEl.value='';output.value='';status('已清空。');
+};
+window.onerror=function(msg){status('页面错误：'+msg+'。请把这一行错误文字发给我。')};
+})();
+</script>
+</body>
+</html>
