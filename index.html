@@ -1,0 +1,1862 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<title>开奖做账表</title>
+<style>
+:root{--bg:#eef1ee;--paper:#fff;--line:#9aa49c;--text:#202720;--red:#a83530;--blue:#315f91;--muted:#687168;--btn:#243228}
+*{box-sizing:border-box} html,body{margin:0;padding:0;background:var(--bg);font-family:Arial,"PingFang SC","Microsoft YaHei",sans-serif;color:var(--text)}
+body{min-height:100vh}.app{width:min(980px,100%);margin:auto;padding:6px}
+.toolbar{display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin:6px 0 2px}
+button{border:0;border-radius:6px;padding:7px 10px;font-size:13px;font-weight:700;background:var(--btn);color:#fff}.secondary{background:#e8ece8;color:#263028;border:1px solid #c8d0c9}.danger{background:#a23d37}
+.status{font-size:11px;color:var(--muted);margin-left:auto}.panel{background:#fff;border:1px solid #cfd6d0;border-radius:7px;padding:5px;margin-bottom:5px}.settings{display:none}.settings.open{display:block}
+.paste-row{display:grid;grid-template-columns:1fr auto;gap:5px}.paste-row textarea{width:100%;height:54px;min-height:54px;resize:none;border:1px solid #b4beb5;border-radius:5px;padding:5px;font:13px/1.35 inherit}.paste-row button{min-width:82px}.hint{font-size:10px;color:#747b74;margin-top:3px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}.field label{display:block;font-size:10px;color:#667066}.field input{width:100%;padding:5px;border:1px solid #bdc6be;border-radius:4px;font-size:12px}.full{grid-column:1/-1}.api-note{font-size:10px;color:#666}.foot-actions{margin-top:5px;display:flex;gap:5px}
+.sheet-wrap{width:100%;overflow:visible}.sheet{background:var(--paper);border:1px solid #727d74;transform-origin:top left}.drawbar{min-height:46px;padding:3px 5px;border-bottom:1px solid var(--line);font-size:11px;font-weight:800;overflow:hidden;display:flex;align-items:center;gap:5px;white-space:nowrap}.draw-title{font-size:10px;line-height:1.15;min-width:42px;text-align:center}.draw-balls{display:flex;align-items:center;gap:3px;min-width:0}.ball-wrap{display:flex;flex-direction:column;align-items:center;gap:1px}.ball{width:33px;height:33px;border-radius:5px;color:#fff;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:900;line-height:1}.ball.red{background:#e41414}.ball.blue{background:#1717df}.ball.green{background:#09870b}.ball-zodiac{font-size:9px;line-height:1;color:#222}.plus{font-size:20px;font-weight:900;margin:0 1px;color:#a33}
+.board{padding:3px}.two{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);align-items:start}.col:first-child{border-right:1px solid var(--line)}table{width:100%;border-collapse:collapse;table-layout:fixed}th,td{border-bottom:1px solid var(--line);height:28px;padding:0;text-align:center;font-size:12px}th{height:25px;background:#f2f4f2;font-weight:800;font-size:12px}th:nth-child(1){width:40px}th:nth-child(2){width:74px}.seq{font-weight:700}.amount input,.hit input{width:100%;height:27px;border:0;border-radius:0;background:transparent;text-align:center;font-size:14px;font-weight:800;padding:0 2px;outline:none}.hit input{text-align:left;color:var(--red);font-size:12px;padding-left:6px}.hit{position:relative}
+.summary{padding:5px 6px 6px;text-align:center}.grand{font-size:22px;font-weight:900;margin:0 0 4px}.stats{display:grid;grid-template-columns:1fr 1fr;gap:1px 16px;max-width:620px;margin:auto;font-size:14px;font-weight:800}.calc{border-top:1px solid #b8c0b9;margin-top:4px;padding-top:4px;display:flex;justify-content:center;align-items:end;gap:7px}.calc .box{min-width:65px}.label{font-size:9px;color:#666}.value{font-size:18px;font-weight:900}.profit .value{color:var(--red)}.minus{font-size:18px;font-weight:900}
+@media(max-width:760px){.app{padding:3px}.toolbar{gap:3px;margin-bottom:3px}.toolbar button{padding:5px 7px;font-size:11px}.status{display:none}.panel{padding:3px;margin-bottom:3px}.paste-row{gap:3px}.paste-row textarea{height:42px;min-height:42px;font-size:11px;padding:4px}.paste-row button{min-width:64px;padding:4px 6px;font-size:11px}.hint{display:none}.drawbar{min-height:38px;font-size:9px;padding:2px 3px;gap:3px}.draw-title{font-size:8px;min-width:34px}.draw-balls{gap:2px}.ball{width:28px;height:28px;font-size:16px;border-radius:4px}.ball-zodiac{font-size:8px}.plus{font-size:16px}.board{padding:2px}th,td{height:23px;font-size:10px}th{height:21px;font-size:10px}th:nth-child(1){width:28px}th:nth-child(2){width:56px}.amount input,.hit input{height:22px;font-size:11px}.hit input{font-size:10px;padding-left:3px}.summary{padding:3px}.grand{font-size:16px;margin-bottom:2px}.stats{font-size:11px;gap:0 8px}.calc{gap:3px;margin-top:2px;padding-top:2px}.calc .box{min-width:42px}.label{font-size:8px}.value,.minus{font-size:13px}.grid{grid-template-columns:1fr 1fr}}
+@media print{body{background:#fff}.app{width:100%;padding:0}.toolbar,.panel{display:none!important}.sheet{transform:none!important;width:100%!important}.sheet-wrap{height:auto!important}.drawbar{font-size:13px}}
+#tables{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:4px!important}
+#tables .col{min-width:0!important;width:auto!important}
+
+
+/* ===== 新增：解析预览层（移植自“最新统计没后台1.0”，不改正式解析） ===== */
+.parse-preview{border:1px solid #d7e2ea;border-radius:6px;padding:6px 8px;margin-top:5px;background:#f7fbff;font-size:11px;line-height:1.45;color:#687168}
+.parse-preview .preview-title{font-weight:800;color:#263028;margin-right:5px}
+#previewText .unrecognized-warning{color:#d60000;font-weight:800}
+#previewText .recognized-ok{color:#1a7f37;font-weight:700}
+@media(max-width:760px){.parse-preview{font-size:10px;padding:4px 6px;margin-top:3px}}
+
+/* ===== 新增：删除序号弹窗（仅界面，不影响原有解析/结算） ===== */
+.delete-modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:9999;padding:16px}
+.delete-modal.open{display:flex}.delete-card{width:min(320px,92vw);background:#fff;border-radius:9px;padding:14px;box-shadow:0 8px 30px rgba(0,0,0,.22)}
+.delete-card h3{margin:0 0 10px;font-size:16px}.delete-card select{width:100%;height:38px;border:1px solid #b9c2ba;border-radius:5px;padding:0 8px;font-size:14px;background:#fff}
+.delete-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}.delete-actions button{min-width:72px}
+
+/* ===== 新增：输入框点击后半屏放大编辑（仅UI，不改解析逻辑） ===== */
+#pasteBox.input-expanded{
+  position:fixed !important;
+  left:2vw !important;
+  top:2vh !important;
+  width:calc(96vw - 108px) !important;
+  height:60vh !important;
+  min-height:60vh !important;
+  max-height:60vh !important;
+  z-index:10050 !important;
+  box-sizing:border-box !important;
+  resize:none !important;
+  overflow:auto !important;
+  background:#fff !important;
+  box-shadow:0 8px 32px rgba(0,0,0,.28) !important;
+}
+body.input-editing::before{
+  content:"";position:fixed;inset:0;background:rgba(0,0,0,.12);z-index:10040;
+}
+body.input-editing #importBtn{
+  position:fixed !important;
+  right:2vw !important;
+  top:2vh !important;
+  width:96px !important;
+  height:60vh !important;
+  z-index:10060 !important;
+  margin:0 !important;
+  display:block !important;
+}
+body.input-editing #previewBox{
+  position:fixed !important;
+  left:2vw !important;
+  right:2vw !important;
+  top:64vh !important;
+  z-index:10060 !important;
+  max-height:30vh !important;
+  overflow:auto !important;
+  box-sizing:border-box !important;
+  background:#fff !important;
+  box-shadow:0 4px 18px rgba(0,0,0,.18) !important;
+}
+
+</style>
+
+</head>
+<body>
+<div class="app">
+  <div class="panel" id="pastePanel">
+    <div class="paste-row">
+      <textarea id="pasteBox" placeholder="每次粘贴一整单，解析后依次进入序号1、2、3……"></textarea>
+      <button id="importBtn">解析入账</button>
+    </div>
+    <div class="parse-preview" id="previewBox"><span class="preview-title">解析预览：</span><span id="previewText">输入内容后这里显示预计识别结果</span></div>
+    <div class="hint">沿用你之前解析工具的投注识别规则；一次粘贴只占一个序号。</div>
+  </div>
+
+  <div class="sheet-wrap" id="sheetWrap">
+    <div class="sheet" id="sheet">
+      <div class="drawbar" id="drawBar">未加载开奖数据</div>
+      <div class="drawbar" id="hkDrawBar"><div class="draw-title">香港开奖<br>未读取</div><div style="font-size:10px;color:#777">来源：香港赛马会</div></div>
+      <div class="board"><div class="two" id="tables"></div></div>
+      <div class="summary">
+        <div class="grand">总数：<span id="grandTotal">0</span></div>
+        <div class="stats">
+          <div>中特：<span id="specialWinDetail">0×47=0</span></div>
+          <div>中平码：<span id="normalCodeWinDetail">0  发奖0</span></div>
+          <div>中特肖：<span id="specialZodiacWinDetail">0  发奖0</span></div>
+          <div>中平尾：<span id="flatTailWinDetail">0  发奖0</span></div>
+          <div>中平特：<span id="flatWinDetail">0×2=0</span></div>
+          <div>水：<span id="specialRebateDetail">0×0.04=0</span></div>
+          <div style="display:none"><span id="flatRebateDetail">0</span></div>
+        </div>
+        <div class="calc">
+          <div class="box"><div class="label">总数</div><div class="value" id="cTotal">0</div></div><div class="minus">-</div>
+          <div class="box"><div class="label">水</div><div class="value" id="cSpecRebate">0</div></div><div class="minus">-</div>
+          <div style="display:none"><span id="cFlatRebate">0</span></div>
+          <div class="box"><div class="label">发奖</div><div class="value" id="cPrize">0</div></div><div class="minus">=</div>
+          <div class="box profit"><div class="label">利</div><div class="value" id="cProfit">0</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="toolbar">
+    <button id="refreshDraw">刷新开奖</button>
+    <button class="secondary" id="printBtn">打印</button>
+    <button class="danger" id="clearAllBtn">全部清零</button>
+    <span class="status" id="status">数据自动保存在本机</span>
+    <button class="danger" id="deleteSeqBtn" style="margin-left:auto">删除序号</button>
+  </div>
+</div>
+
+  <div class="toolbar mode-switch-toolbar" style="justify-content:center;margin:8px 0 12px">
+    <button class="secondary" id="switchToLianxiaoBtn" type="button">切换连肖模式</button>
+  </div>
+
+<!-- ===== 新增：删除序号弹窗 ===== -->
+<div class="delete-modal" id="deleteSeqModal" aria-hidden="true">
+  <div class="delete-card">
+    <h3>删除序号</h3>
+    <select id="deleteSeqSelect"></select>
+    <div class="delete-actions">
+      <button class="secondary" id="deleteSeqCancel">取消</button>
+      <button class="danger" id="deleteSeqConfirm">确认删除</button>
+    </div>
+  </div>
+</div>
+<script>
+const $=s=>document.querySelector(s), LS='lottery_book_v4';
+const DRAW_SOURCE='https://gaokao.xn--6-com-020-pn6u.xyz/guidelines3/';
+const DRAW_HOME='https://gaokao.xn--6-com-020-pn6u.xyz/home/';
+const numbers=Array.from({length:49},(_,i)=>(i+1).toString().padStart(2,'0'));
+// 2026 马年映射：与用户现用解析工具保持一致
+const zodiacNumbers={"马":["01","13","25","37","49"],"蛇":["02","14","26","38"],"龙":["03","15","27","39"],"兔":["04","16","28","40"],"虎":["05","17","29","41"],"牛":["06","18","30","42"],"鼠":["07","19","31","43"],"猪":["08","20","32","44"],"狗":["09","21","33","45"],"鸡":["10","22","34","46"],"猴":["11","23","35","47"],"羊":["12","24","36","48"]};
+const colorMap={"红":["01","02","07","08","12","13","18","19","23","24","29","30","34","35","40","45","46"],"蓝":["03","04","09","10","14","15","20","25","26","31","36","37","41","42","47","48"],"绿":["05","06","11","16","17","21","22","27","28","32","33","38","39","43","44","49"]};
+let state={rows:[],nextIndex:0,draw:null,hkDraw:null,settings:{specialRebate:.04,flatRebate:.04,specialPrize:47,flatPrize:2}};
+function blankRow(){return{amount:'',hit:'',raw:''}}
+function makeRows(){state.rows=Array.from({length:90},blankRow)}
+function load(){try{const x=JSON.parse(localStorage.getItem(LS)||'null');if(x)state={...state,...x,settings:{...state.settings,...(x.settings||{})}}}catch(e){};if(!Array.isArray(state.rows)||!state.rows.length)makeRows();while(state.rows.length<90)state.rows.push(blankRow());if(!Number.isInteger(state.nextIndex)){let last=-1;state.rows.forEach((r,i)=>{if(r.amount||r.raw||r.hit)last=i});state.nextIndex=last+1}}
+function save(msg){localStorage.setItem(LS,JSON.stringify(state));if(msg)status(msg)}
+function status(t){$('#status').textContent=t;clearTimeout(status.t);status.t=setTimeout(()=>$('#status').textContent='数据自动保存在本机',2400)}
+function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function n(v){v=parseFloat(String(v??'').replace(/[^0-9.-]/g,''));return Number.isFinite(v)?v:0}
+function fmt(v){return Number.isInteger(v)?String(v):parseFloat(Number(v).toFixed(4)).toString()}
+function ballColor(num){num=String(num).padStart(2,'0');if(colorMap['红'].includes(num))return'red';if(colorMap['蓝'].includes(num))return'blue';return'green'}
+function zodiacOf(num){num=String(num).padStart(2,'0');for(const [z,arr] of Object.entries(zodiacNumbers))if(arr.includes(num))return z;return''}
+function renderDraw(){
+ const bar=$('#drawBar');
+ if(!state.draw){bar.innerHTML='<div class="draw-title">开奖<br>未读取</div><div style="font-size:10px;color:#777">点击下方“刷新开奖”自动读取</div>';return}
+ const d=state.draw, list=[...(d.normal||[])];
+ let h=`<div class="draw-title">${esc(d.date||'')}<br>${esc(d.period||'')}</div><div class="draw-balls">`;
+ list.forEach(x=>{const num=String(x.number).padStart(2,'0'),z=x.zodiac||zodiacOf(num);h+=`<div class="ball-wrap"><div class="ball ${ballColor(num)}">${esc(num)}</div><div class="ball-zodiac">${esc(z)}</div></div>`});
+ if(d.special){const num=String(d.special.number).padStart(2,'0'),z=d.special.zodiac||zodiacOf(num);h+=`<div class="plus">+</div><div class="ball-wrap"><div class="ball ${ballColor(num)}">${esc(num)}</div><div class="ball-zodiac">${esc(z)}</div></div>`}
+ h+='</div>';bar.innerHTML=h
+}
+function tableHTML(start,end){
+ const rows=[];
+ for(let i=start;i<end;i++){
+   const r=state.rows[i]||blankRow();
+   rows.push(`<tr><td class="seq">${(r.amount||r.raw||r.hit)?i+1:''}</td><td class="amount"><input inputmode="decimal" data-i="${i}" data-k="amount" value="${esc(r.amount||'')}"></td><td class="hit"><input data-i="${i}" data-k="hit" value="${esc(r.hit||'')}"></td></tr>`);
+ }
+ return `<div class="col"><table><thead><tr><th>序号</th><th>金额</th><th>中</th></tr></thead><tbody>${rows.join('')}</tbody></table></div>`;
+}
+
+function renderHkDraw(){
+  const bar=$('#hkDrawBar');
+  if(!bar)return;
+  if(!state.hkDraw){
+    bar.innerHTML='<div class="draw-title">香港开奖<br>未读取</div><div style="font-size:10px;color:#777">来源：香港赛马会 bet.hkjc.com</div>';
+    return;
+  }
+  const d=state.hkDraw,list=[...(d.normal||[])];
+  const rawDate=String(d.date||'');
+  const dm=rawDate.match(/(\d{4})[-\/]?(\d{2})[-\/]?(\d{2})/);
+  const dateText=dm?`${dm[1]}年${dm[2]}月${dm[3]}日`:rawDate.replace(/[T+].*$/,'');
+  // HKJC drawDate 末尾的 +08:00 是香港时区偏移，不是开奖时间；六合彩开奖时间显示为 21:30。
+  const timeText='21:30';
+  const periodText=String(d.period||'').replace(/^\s+|\s+$/g,'');
+  let h=`<div class="draw-title">香港开奖<br>${esc(dateText)} ${esc(timeText)}<br>${esc(periodText?periodText+'期':'')}</div><div class="draw-balls">`;
+  list.forEach(x=>{const num=String(x.number).padStart(2,'0'),z=x.zodiac||zodiacOf(num);h+=`<div class="ball-wrap"><div class="ball ${ballColor(num)}">${esc(num)}</div><div class="ball-zodiac">${esc(z)}</div></div>`});
+  if(d.special){const num=String(d.special.number).padStart(2,'0'),z=d.special.zodiac||zodiacOf(num);h+=`<div class="plus">+</div><div class="ball-wrap"><div class="ball ${ballColor(num)}">${esc(num)}</div><div class="ball-zodiac">${esc(z)}</div></div>`}
+  h+='</div>';bar.innerHTML=h;
+}
+// 仅新增开奖分流：原文出现“香港 / 港 / 香”时用香港开奖，否则继续用原开奖。
+function isHongKongBet(raw){return /^\s*香港(?:\s|[0-9鼠牛虎兔龙蛇马羊猴鸡狗猪])/.test(String(raw||''))||/香港|港|香/.test(String(raw||''))}
+function drawForBet(raw){return isHongKongBet(raw)?state.hkDraw:state.draw}
+function renderTable(){while(state.rows.length<90)state.rows.push(blankRow());$('#tables').innerHTML=tableHTML(0,30)+tableHTML(30,60)+tableHTML(60,90);document.querySelectorAll('[data-k]').forEach(el=>el.oninput=e=>{const i=+e.target.dataset.i;state.rows[i][e.target.dataset.k]=e.target.value;save();calc()});requestAnimationFrame(fitSheet)}
+function calc(){const total=state.rows.reduce((s,r)=>s+n(r.amount),0);let specialUnits=0,flatBase=0;state.rows.forEach(r=>{const h=(r.hit||'').replace(/\s/g,'');let m=h.match(/中特(?:码)?(\d+(?:\.\d+)?)/i);if(m)specialUnits+=n(m[1]);m=h.match(/中?平特(?:码)?(\d+(?:\.\d+)?)/i);if(m)flatBase+=n(m[1])});const sp=+state.settings.specialPrize||0,fp=+state.settings.flatPrize||0,sr=+state.settings.specialRebate||0,fr=.04;const specialPrize=specialUnits*sp,flatPrize=flatBase*fp,prize=specialPrize+flatPrize,specialBase=Math.max(0,total-flatBase),specialRebate=Math.round(specialBase*sr),flatRebate=Math.round(flatBase*fr),profit=Math.round(total-specialRebate-flatRebate-prize);$('#grandTotal').textContent=fmt(total);$('#specialWinDetail').textContent=`${fmt(specialUnits)}×${fmt(sp)}=${fmt(specialPrize)}`;$('#flatWinDetail').textContent=`${fmt(flatBase)}×${fmt(fp)}=${fmt(flatPrize)}`;$('#specialRebateDetail').textContent=`${fmt(total)}×0.04=${fmt(specialRebate)}`;$('#flatRebateDetail').textContent='0';$('#cTotal').textContent=fmt(total);$('#cSpecRebate').textContent=fmt(specialRebate);$('#cFlatRebate').textContent=fmt(flatRebate);$('#cPrize').textContent=fmt(prize);$('#cProfit').textContent=fmt(profit);requestAnimationFrame(fitSheet)}
+function toHalfWidth(str){return String(str).replace(/[０-９]/g,s=>String.fromCharCode(s.charCodeAt(0)-0xFEE0)).replace(/[＋－／．，：；｜　]/g,ch=>({'＋':'+','－':'-','／':'/','．':'.','，':',','：':':','；':';','｜':'|','　':' '}[ch]||ch))}
+function formatBetAmount(v){const x=Number(v);return Number.isFinite(x)?parseFloat(x.toFixed(4)).toString():'0'}
+// 直接沿用之前“截图在用解析”的文本预处理核心规则
+function preprocessInput(input){
+ input=toHalfWidth(input).trim().replace(/两/g,'二').replace(/[·•・]/g,' ').replace(/平特/g,' ');
+ input=input.replace(/各号码/g,'各号').replace(/每个号码/g,'各号').replace(/每个号/g,'各号').replace(/每个/g,'各号').replace(/各号买/g,'各号');
+ input=input.replace(/[（(【\[]/g,' ').replace(/[）)】\]]/g,' ').replace(/(?:下注|各下|投|压|下)/g,' ').replace(/(?:元|块钱|块|米)/g,'');
+ input=input.replace(/(?:每个|每号|每码|每肖|每只|各个|各只)/g,'各号').replace(/(?:各数|个数|号各|买)/g,'各号').replace(/尾数/g,'尾').replace(/头数/g,'头');
+ input=input.replace(/红波单|红单波/g,'红单').replace(/红波双|红双波/g,'红双').replace(/蓝波单|蓝单波/g,'蓝单').replace(/蓝波双|蓝双波/g,'蓝双').replace(/绿波单|绿单波/g,'绿单').replace(/绿波双|绿双波/g,'绿双').replace(/特码/g,'');
+ input=input.replace(/(^|\s)(\d{1,2})[一\-=:：\/](\d+(?:\.\d+)?)(?:米)?(?=[\s，。,\.]|$)/g,'$1$2各号$3');
+ input=input.replace(/(?<=\d)。|。(?![一-龥a-zA-Z])/g,' ');['+','/','-','.',','].forEach(sym=>input=input.split(sym).join(' '));
+ const zs=['鼠','牛','虎','兔','龙','蛇','马','羊','猴','鸡','狗','猪'];const zr=new RegExp(`(${zs.join('|')})[^一-龥]*?(?=(${zs.join('|')}))`,'g');input=input.replace(zr,(m,p1)=>p1);const zg=new RegExp(`(${zs.join('|')})[^一-龥]*?(?=各)`,'g');input=input.replace(zg,(m,p1)=>p1);input=input.replace(/=/g,'各').replace(/(\d{1,2})[，。](?=\d{1,2}[^一-龥]*各)/g,'$1 ');
+ input=input.replace(/([一二三四五六七八九]?十[一二三四五六七八九]?|[一二三四五六七八九]百[一二三四五六七八九]?十?[一二三四五六七八九]?)/g,match=>{const map={'零':0,'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9},unit={'十':10,'百':100,'千':1000};let result=0,temp=0,lastUnit=1,hasUnit=false;for(const ch of match){if(ch in map)temp=map[ch];else if(ch in unit){if(temp===0&&ch==='十')temp=1;result+=temp*unit[ch];lastUnit=unit[ch];temp=0;hasUnit=true}}if(temp>0&&hasUnit){if(lastUnit===100)result+=temp*10;else result+=temp}else result+=temp;return result});
+ const sd={'零':'0','一':'1','二':'2','三':'3','四':'4','五':'5','六':'6','七':'7','八':'8','九':'9'};input=input.replace(/[零一二三四五六七八九]/g,ch=>sd[ch]);
+ // 生肖“牛羊20”表示每个生肖总额20，按生肖号码数平均；保留原解析逻辑
+ input=input.replace(/(^|\s)([鼠牛虎兔龙蛇马羊猴鸡狗猪]+)(?:肖)?\s*各?\s*(\d+(?:\.\d+)?)(?=\s|$)/g,(m,prefix,zodiacText,amount)=>prefix+zodiacText.split('').map(z=>{const nums=zodiacNumbers[z];if(!nums||!nums.length)return z+'各号'+amount;return z+'各号'+formatBetAmount(parseFloat(amount)/nums.length)}).join(' '));
+ input=input.replace(/((?:家肖|家禽|野兽|野肖|大单|小单|大双|小双|红单|红双|蓝单|蓝双|绿单|绿双|红蓝绿|红蓝|红绿|蓝绿|大数|小数|[0-9]+头|[0-9]+尾|[鼠牛虎兔龙蛇马羊猴鸡狗猪]+|[红蓝绿]波))\s*(\d+)(?!\d)/g,'$1各号$2').replace(/各\s*(\d+)/g,'各号$1').replace(/号号/g,'号');
+ input=input.replace(/大数各号(\d{1,2})/g,(m,a)=>numbers.filter(x=>+x>=25).join(' ')+'各号'+a).replace(/小数各号(\d{1,2})/g,(m,a)=>numbers.filter(x=>+x<=24).join(' ')+'各号'+a);
+ input=input.replace(/([0-9]+)头各号(\d{1,2})/g,(m,heads,a)=>numbers.filter(x=>heads.includes(x[0])).join(' ')+'各号'+a).replace(/([0-9]+)尾各号(\d{1,2})/g,(m,tails,a)=>numbers.filter(x=>tails.includes(x[1])).join(' ')+'各号'+a);
+ input=input.replace(/单数/g,numbers.filter(x=>+x%2).join(' ')).replace(/双数/g,numbers.filter(x=>+x%2===0).join(' '));
+ input=input.replace(/\s+/g,' ').trim().replace(/(\d+(?:\.\d+)?)米(?=\d)/g,'$1 ').replace(/[，。、]+/g,' ').replace(/(?<=\b\d{2})\s*(?=\d{2}\b)/g,' ').replace(/\s+/g,' ').trim();return input;
+}
+function parseBetTotal(raw){
+ const input=preprocessInput(raw);let total=0;const add=(count,amount)=>{amount=parseFloat(amount)||0;if(count&&amount)total+=count*amount};let m;
+ const regex=/(\d{1,2}(?:[ ,.+\-~=%\/”]+\d{1,2})*)\s*(?:个|各|肖个号|肖个数|肖各号|码各|码个|一个买|一个)(?:数|号)?(\d+(?:\.\d+)?)|([一-龥]+)\s*(?:号)?(?:个|各|肖个号|肖个数|肖各号|码各|码个|一个买|一个)(?:数|号)?(\d+(?:\.\d+)?)(?:[快块米])?/g;
+ while((m=regex.exec(input))){if(m[1]&&m[2]){const list=m[1].split(/[ ,./+、，。;；:：|\-~=%\\”]+/).map(x=>x.padStart(2,'0')).filter(x=>numbers.includes(x));add(list.length,m[2])}else if(m[3]&&m[4]){let count=0;m[3].split('').forEach(z=>{if(zodiacNumbers[z])count+=zodiacNumbers[z].length});add(count,m[4])}}
+ let r=/(红|蓝|绿)波\s*(?:各号|各数|个号|号个|个数|数个|数各|号各)\s*(\d+(?:\.\d+)?)/g;while((m=r.exec(input)))add((colorMap[m[1]]||[]).length,m[2]);
+ r=/((?:红|蓝|绿){2,})\s*(?:各号|各数|个号|号个|个数|数个|数各|号各)\s*(\d+(?:\.\d+)?)/g;while((m=r.exec(input)))m[1].split('').forEach(c=>add((colorMap[c]||[]).length,m[2]));
+ r=/(红|蓝|绿)(波)?(单|双)\s*(?:各号)?\s*(\d+(?:\.\d+)?)/g;while((m=r.exec(input))){const nums=(colorMap[m[1]]||[]).filter(x=>m[3]==='单'?+x%2:+x%2===0);add(nums.length,m[4])}
+ r=/(家肖|家禽)\s*各?号?(\d+(?:\.\d+)?)/g;while((m=r.exec(input))){let c=0;['牛','羊','马','猪','狗','鸡'].forEach(z=>c+=(zodiacNumbers[z]||[]).length);add(c,m[2])}
+ r=/(野兽|野肖)\s*各?号?(\d+(?:\.\d+)?)/g;while((m=r.exec(input))){let c=0;['猴','鼠','龙','蛇','虎','兔'].forEach(z=>c+=(zodiacNumbers[z]||[]).length);add(c,m[2])}
+ const groups={大单:numbers.filter(x=>+x>=25&&+x%2),小单:numbers.filter(x=>+x<=24&&+x%2),大双:numbers.filter(x=>+x>=25&&+x%2===0),小双:numbers.filter(x=>+x<=24&&+x%2===0)};
+ r=/(大单|小单|大双|小双)\s*(?:各号|各数|号各|数各|个号)?\s*(\d+(?:\.\d+)?)/g;while((m=r.exec(input)))add((groups[m[1]]||[]).length,m[2]);
+ r=/((?:大单|小单|大双|小双){2,})\s*(?:各号|各数|号各|数各|个号)?\s*(\d+(?:\.\d+)?)/g;while((m=r.exec(input)))(m[1].match(/大单|小单|大双|小双/g)||[]).forEach(g=>add((groups[g]||[]).length,m[2]));
+ if(total===0&&/^\s*\d+(?:\.\d+)?\s*$/.test(raw))return +raw;return parseFloat(total.toFixed(4));
+}
+
+// ===== 新增：澳门 / 香港 / 港澳双边分流（只在入账前分段，不改变原下注解析） =====
+// 澳门标记：奥、澳门、门、澳、奥门、新奥、新澳、新；香港标记：港、香、香港。
+// 标记后的无标记行继承最近盘口；“港澳/澳港”表示后续内容两边各买一份。
+function splitMarketBlocksV1(raw){
+  const lines=String(raw||'').replace(/\r/g,'').split('\n');
+  let mode='MO'; // 没有盘口标记时保持原默认澳门
+  let explicitSeen=false;
+  const out=[];
+  let pendingDefault=null;
+
+  const add=(market,text)=>{
+    text=String(text||'').trim(); if(!text)return -1;
+    const tag=market==='HK'?'香港 ':'澳门 ';
+    const last=out[out.length-1];
+    if(last&&last.market===market){last.raw+='\n'+text;return out.length-1}
+    out.push({market,raw:tag+text});return out.length-1;
+  };
+  const addBoth=(text)=>{
+    text=String(text||'').trim(); if(!text)return;
+    add('MO',text); add('HK',text);
+  };
+  const dualToken=(s)=>{
+    s=String(s||'').replace(/\s+/g,'');
+    return /^(?:港澳|澳港|港奥|奥港|香港澳门|澳门香港|香港奥门|奥门香港)$/.test(s);
+  };
+  const singleToken=(s)=>{
+    s=String(s||'').trim();
+    if(/^(?:港|香|香港)$/.test(s))return 'HK';
+    if(/^(?:澳|奥|门|新|澳门|奥门|新澳|新奥)$/.test(s))return 'MO';
+    return null;
+  };
+  const prefix=(s)=>{
+    let m;
+    if((m=s.match(/^(港\s*澳|澳\s*港|港\s*奥|奥\s*港|香港\s*澳门|澳门\s*香港|香港\s*奥门|奥门\s*香港)\s*/)))
+      return {mode:'BOTH',rest:s.slice(m[0].length)};
+    if((m=s.match(/^(香港)\s*/)))return {mode:'HK',rest:s.slice(m[0].length)};
+    if((m=s.match(/^(澳门|奥门|新澳|新奥)\s*/)))return {mode:'MO',rest:s.slice(m[0].length)};
+    const betStart='(?=\\s|[0-9鼠牛虎兔龙蛇马羊猴鸡狗猪平特红蓝绿大小单双家野天地]|$)';
+    if((m=s.match(new RegExp('^(港|香)'+betStart))))return {mode:'HK',rest:s.slice(m[0].length)};
+    if((m=s.match(new RegExp('^(澳|奥|门|新)'+betStart))))return {mode:'MO',rest:s.slice(m[0].length)};
+    return null;
+  };
+  const suffix=(s)=>{
+    let m;
+    if((m=s.match(/\s+(港\s*澳|澳\s*港|港\s*奥|奥\s*港|香港\s*澳门|澳门\s*香港|香港\s*奥门|奥门\s*香港)\s*$/)))
+      return {mode:'BOTH',rest:s.slice(0,m.index).trim()};
+    if((m=s.match(/\s+(香港|港|香)\s*$/)))return {mode:'HK',rest:s.slice(0,m.index).trim()};
+    if((m=s.match(/\s+(澳门|奥门|新澳|新奥|澳|奥|门|新)\s*$/)))return {mode:'MO',rest:s.slice(0,m.index).trim()};
+    return null;
+  };
+
+  lines.forEach((line,lineIndex)=>{
+    const s0=String(line||'').trim(); if(!s0)return;
+
+    // 单独一行盘口：若紧跟在“默认盘口、未明确标记”的上一笔后面，则作为后置盘口；
+    // 否则保持原来的“影响后续下注”规则。
+    const wholeDual=dualToken(s0), wholeSingle=singleToken(s0);
+    if(wholeDual||wholeSingle){
+      if(pendingDefault && pendingDefault.lineIndex===lineIndex-1){
+        const idx=pendingDefault.outIndex, old=out[idx];
+        if(old){
+          const body=old.raw.replace(/^\s*澳门\s*/,'');
+          if(wholeDual){
+            old.market='MO'; old.raw='澳门 '+body;
+            out.splice(idx+1,0,{market:'HK',raw:'香港 '+body});
+            mode='BOTH';
+          }else{
+            old.market=wholeSingle;
+            old.raw=(wholeSingle==='HK'?'香港 ':'澳门 ')+body;
+            mode=wholeSingle;
+          }
+        }
+        pendingDefault=null; explicitSeen=true; return;
+      }
+      pendingDefault=null; explicitSeen=true;
+      mode=wholeDual?'BOTH':wholeSingle;
+      return;
+    }
+
+    // 同一行结尾盘口只管这一笔：01.02个50 澳 = 只澳门；... 港 = 只香港；
+    // 组合结尾则这一笔港澳两边各买。
+    const sf=suffix(s0);
+    if(sf && sf.rest){
+      pendingDefault=null; explicitSeen=true;
+      if(sf.mode==='BOTH')addBoth(sf.rest); else add(sf.mode,sf.rest);
+      return;
+    }
+
+    let lineText=s0;
+    const pf=prefix(s0);
+    if(pf){
+      pendingDefault=null; explicitSeen=true; mode=pf.mode;
+      if(!pf.rest)return;
+      lineText=pf.rest;
+    }
+
+    if(mode==='BOTH'){
+      pendingDefault=null;
+      addBoth(lineText);
+    }else{
+      const idx=add(mode,lineText);
+      if(mode==='MO' && !explicitSeen && !pf && idx>=0){
+        const body=out[idx].raw.replace(/^\s*澳门\s*/,'');
+        if(body.trim()===lineText.trim())pendingDefault={outIndex:idx,lineIndex};
+        else pendingDefault=null;
+      }else pendingDefault=null;
+    }
+  });
+  return out;
+}
+function importRows(){
+  const raw=$('#pasteBox').value.trim();if(!raw)return status('请先粘贴一单投注');
+  const blocks=splitMarketBlocksV1(raw).map(b=>({...b,amount:parseBetTotal(b.raw)})).filter(b=>b.amount>0);
+  if(!blocks.length)return status('没有解析出金额，请检查内容');
+  if(state.nextIndex>=90){status('90格已满，请先全部清零');return}
+  const idx=state.nextIndex;
+  const total=blocks.reduce((s,b)=>s+b.amount,0);
+  // 一个原始订单只占一个序号；港澳子单保存在 marketBlocks 内，分别结算。
+  state.rows[idx]={...state.rows[idx],amount:fmt(total),raw,marketBlocks:blocks.map(b=>({market:b.market,raw:b.raw,amount:b.amount}))};
+  state.nextIndex=idx+1;
+  if(state.draw||state.hkDraw)autoJudgeRows();
+  $('#pasteBox').value='';
+  save(`第${idx+1}单：${fmt(total)}`);
+  renderTable();calc();
+}
+function addStake(map,num,amt){num=String(num).padStart(2,'0');if(numbers.includes(num)){map[num]=(map[num]||0)+(parseFloat(amt)||0)}}
+function parseBetMaps(raw){
+  // 保留“平特”标记，再复用原解析预处理；输出每个号码实际下注金额。
+  const marked=String(raw||'').replace(/平特/g,' FLATMARK ');
+  const input=preprocessInput(marked);
+  const special={},flat={};
+  const targetAt=(idx)=>{
+    const left=input.slice(Math.max(0,idx-80),idx);
+    const lm=left.lastIndexOf('FLATMARK');
+    if(lm<0)return special;
+    // 标记后如果已经出现过“各号+金额”，说明该平特组已经结束。
+    const after=left.slice(lm+'FLATMARK'.length);
+    if(/各号\s*\d+(?:\.\d+)?/.test(after))return special;
+    return flat;
+  };
+  let m;
+  const rg=/(\d{1,2}(?:\s+\d{1,2})*)\s*(?:个|各|肖个号|肖个数|肖各号|码各|码个|一个买|一个)(?:数|号)?(\d+(?:\.\d+)?)/g;
+  while((m=rg.exec(input))){const map=targetAt(m.index);const a=+m[2]||0;(m[1].match(/\d{1,2}/g)||[]).forEach(x=>addStake(map,x,a))}
+  const zg=/([鼠牛虎兔龙蛇马羊猴鸡狗猪]+)\s*(?:号)?(?:个|各|肖个号|肖个数|肖各号|码各|码个|一个买|一个)(?:数|号)?(\d+(?:\.\d+)?)/g;
+  while((m=zg.exec(input))){const map=targetAt(m.index),a=+m[2]||0;m[1].split('').forEach(z=>(zodiacNumbers[z]||[]).forEach(x=>addStake(map,x,a)))}
+  const addGroup=(re,getNums,amountIndex)=>{let x;while((x=re.exec(input))){const map=targetAt(x.index),a=+x[amountIndex]||0;getNums(x).forEach(v=>addStake(map,v,a))}};
+  addGroup(/(红|蓝|绿)波\s*(?:各号|各数|个号|号个|个数|数个|数各|号各)\s*(\d+(?:\.\d+)?)/g,x=>colorMap[x[1]]||[],2);
+  addGroup(/(红|蓝|绿)(?:波)?(单|双)\s*(?:各号)?\s*(\d+(?:\.\d+)?)/g,x=>(colorMap[x[1]]||[]).filter(v=>x[2]==='单'?+v%2:+v%2===0),3);
+  const groupMap={
+    家肖:['牛','羊','马','猪','狗','鸡'],家禽:['牛','羊','马','猪','狗','鸡'],野兽:['猴','鼠','龙','蛇','虎','兔'],野肖:['猴','鼠','龙','蛇','虎','兔'],
+    大单:numbers.filter(x=>+x>=25&&+x%2),小单:numbers.filter(x=>+x<=24&&+x%2),大双:numbers.filter(x=>+x>=25&&+x%2===0),小双:numbers.filter(x=>+x<=24&&+x%2===0)
+  };
+  addGroup(/(家肖|家禽|野兽|野肖|大单|小单|大双|小双)\s*(?:各号|各数|号各|数各|个号)?\s*(\d+(?:\.\d+)?)/g,x=>{
+    const g=groupMap[x[1]]||[];return g.length&&zodiacNumbers[g[0]]?g.flatMap(z=>zodiacNumbers[z]||[]):g
+  },2);
+  return {special,flat};
+}
+function autoJudgeRows(){
+  if(!state.draw)return;
+  const normalNums=new Set((state.draw.normal||[]).map(x=>String(x.number).padStart(2,'0')));
+  const specialNum=state.draw.special?String(state.draw.special.number).padStart(2,'0'):'';
+  state.rows.forEach(r=>{
+    if(!r.raw)return;
+    const maps=parseBetMaps(r.raw);let sh=specialNum?(maps.special[specialNum]||0):0, fh=0;
+    normalNums.forEach(x=>fh+=(maps.flat[x]||0));
+    const parts=[];if(sh>0)parts.push('中特'+fmt(sh));if(fh>0)parts.push('中平特'+fmt(fh));r.hit=parts.join(' ');
+  });
+}
+function normalizeApiResponse(j){
+ if(j&&j.data&&!j.normal)j=j.data;
+ if(j&&Array.isArray(j.data)&&j.data.length)j=j.data[0];
+ if(j&&Array.isArray(j.list)&&j.list.length)j=j.list[0];
+ if(!j)throw new Error('空数据');
+ if(Array.isArray(j.normal)&&j.special)return{date:j.date||j.openDate||'',period:j.period||j.issue||'新开',normal:j.normal.map(x=>typeof x==='string'?{number:x,zodiac:zodiacOf(x)}:x),special:typeof j.special==='string'?{number:j.special,zodiac:zodiacOf(j.special)}:j.special};
+ const seq=j.numbers||j.result||j.openCode||j.code||j.kjhm||j.openNumbers;
+ if(seq){const nums=Array.isArray(seq)?seq.map(String):(String(seq).match(/(?:^|\D)(0?[1-9]|[1-4]\d)(?=\D|$)/g)||[]).map(x=>x.replace(/\D/g,''));if(nums.length>=7)return makeDraw(nums.slice(0,7),j.date||j.openDate||'',j.period||j.issue||j.expect||'新开')}
+ throw new Error('字段不匹配')
+}
+function makeDraw(nums,date='',period='新开'){nums=nums.map(x=>String(parseInt(x,10)).padStart(2,'0'));return{date,period,normal:nums.slice(0,6).map(number=>({number,zodiac:zodiacOf(number)})),special:{number:nums[6],zodiac:zodiacOf(nums[6])}}}
+function stripHtml(html){const doc=new DOMParser().parseFromString(String(html||''),'text/html');return (doc.body?.innerText||'').replace(/\s+/g,' ').trim()}
+function extractDrawFromText(raw){
+ const txt=stripHtml(raw)+' '+String(raw||'').replace(/[{}\[\]"']/g,' ');
+ const pairRe=/(0?[1-9]|[1-4]\d)\s*([鼠牛虎兔龙蛇马羊猴鸡狗猪])/g;let pairs=[],m;
+ while((m=pairRe.exec(txt))){const n=String(+m[1]).padStart(2,'0');if(+n>=1&&+n<=49)pairs.push({number:n,zodiac:m[2]})}
+ if(pairs.length>=7){pairs=pairs.slice(-7);return{date:(txt.match(/(\d{1,2}月\d{1,2}日)/)||[])[1]||'',period:(txt.match(/第?\s*(20\d{4,})\s*期/)||[])[1]||'新开',normal:pairs.slice(0,6),special:pairs[6]}}
+ const chunks=txt.match(/(?:^|\s)(0?[1-9]|[1-4]\d)(?=\s|$)/g)||[];const nums=chunks.map(x=>x.trim()).filter(x=>+x>=1&&+x<=49);if(nums.length>=7)return makeDraw(nums.slice(-7));
+ throw new Error('页面里没有识别到7个开奖号码')
+}
+async function fetchText(url){const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);return await r.text()}
+async function refreshDraw(){
+ status('正在读取开奖网站…');
+ const attempts=[
+   async()=>extractDrawFromText(await fetchText(DRAW_HOME)),
+   async()=>extractDrawFromText(await fetchText(DRAW_SOURCE)),
+   async()=>extractDrawFromText(await fetchText('https://api.allorigins.win/raw?url='+encodeURIComponent(DRAW_HOME))),
+   async()=>extractDrawFromText(await fetchText('https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(DRAW_HOME)))
+ ];
+ let lastErr='';
+ for(const fn of attempts){try{state.draw=await fn();autoJudgeRows();save('开奖已更新');renderDraw();renderTable();calc();fitSheet();return}catch(e){lastErr=e.message||String(e)}}
+ status('开奖读取失败，请稍后再刷新');console.warn('draw source failed',lastErr)
+}
+function clearAll(){if(!confirm('确定全部清零？序号金额、中奖栏、粘贴内容都会清空。'))return;makeRows();state.nextIndex=0;$('#pasteBox').value='';save('已全部清零');renderTable();calc()}
+
+// ===== 新增：删除指定已有序号；删除后有效记录自动前移，保持序号连续 =====
+function rowHasData(r){return !!(r&&(r.amount||r.raw||r.hit))}
+function openDeleteSeq(){
+  const used=[];state.rows.forEach((r,i)=>{if(rowHasData(r))used.push(i)});
+  if(!used.length){status('当前没有可删除的序号');return}
+  const sel=$('#deleteSeqSelect');
+  sel.innerHTML=used.map(i=>{const r=state.rows[i]||blankRow();const amount=r.amount?`（金额 ${esc(r.amount)}）`:'';return `<option value="${i}">序号 ${i+1}${amount}</option>`}).join('');
+  $('#deleteSeqModal').classList.add('open');$('#deleteSeqModal').setAttribute('aria-hidden','false');
+}
+function closeDeleteSeq(){const m=$('#deleteSeqModal');m.classList.remove('open');m.setAttribute('aria-hidden','true')}
+function deleteSelectedSeq(){
+  const idx=+$('#deleteSeqSelect').value;if(!Number.isInteger(idx)||idx<0||idx>=state.rows.length||!rowHasData(state.rows[idx])){closeDeleteSeq();status('该序号不存在');return}
+  if(!confirm(`确定删除序号 ${idx+1}？`))return;
+  const kept=state.rows.filter((r,i)=>i!==idx&&rowHasData(r));
+  state.rows=kept.concat(Array.from({length:Math.max(0,90-kept.length)},blankRow)).slice(0,90);
+  state.nextIndex=kept.length;
+  closeDeleteSeq();save(`已删除序号 ${idx+1}`);renderTable();calc();
+}
+
+function fitSheet(){const sheet=$('#sheet'),wrap=$('#sheetWrap');if(!sheet||!wrap)return;sheet.style.transform='none';sheet.style.width='100%';wrap.style.height='auto';if(window.innerWidth>760)return;const top=wrap.getBoundingClientRect().top;const available=Math.max(240,window.innerHeight-top-3);const naturalH=sheet.scrollHeight;const naturalW=sheet.scrollWidth;const scale=Math.min(1,available/naturalH,(window.innerWidth-6)/naturalW);sheet.style.transform=`scale(${scale})`;sheet.style.width=(100/scale)+'%';wrap.style.height=(naturalH*scale)+'px'}
+$('#importBtn').onclick=importRows;$('#clearAllBtn').onclick=clearAll;$('#printBtn').onclick=()=>window.print();$('#refreshDraw').onclick=refreshDraw;$('#deleteSeqBtn').onclick=openDeleteSeq;$('#deleteSeqCancel').onclick=closeDeleteSeq;$('#deleteSeqConfirm').onclick=deleteSelectedSeq;$('#deleteSeqModal').onclick=e=>{if(e.target.id==='deleteSeqModal')closeDeleteSeq()};
+$('#pasteBox').addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter')importRows()});
+// ===== 新增：点击输入框半屏放大；点外部或解析时恢复 =====
+const pasteBoxEl=$('#pasteBox');
+function expandPasteBoxV1(){pasteBoxEl.classList.add('input-expanded');document.body.classList.add('input-editing')}
+function collapsePasteBoxV1(){pasteBoxEl.classList.remove('input-expanded');document.body.classList.remove('input-editing')}
+pasteBoxEl.addEventListener('focus',expandPasteBoxV1);
+document.addEventListener('pointerdown',e=>{if(pasteBoxEl.classList.contains('input-expanded')&&!pasteBoxEl.contains(e.target))collapsePasteBoxV1()},true);
+$('#importBtn').addEventListener('click',collapsePasteBoxV1,true);
+window.addEventListener('resize',()=>setTimeout(fitSheet,60));
+
+// ===== 新增：2026马年赔率结算层（不删除原有解析、界面、开奖代码） =====
+// 用户提供的蛇年赔率仅将“蛇本命肖”改为“马本命肖”；全部赔率均包含本金。
+const ODDS_MA={
+  特码:47, 特肖普通:11, 特肖马:9.5, 特肖四肖:2.6, 特肖五肖:2,
+  平码:{1:7,2:60,3:600}, 平特肖普通:2, 平特肖马:1.75,
+  连肖普通:{2:4,3:10,4:30,5:100}, 连肖带马:{2:3.5,3:8.5,4:26,5:85},
+  两面:1.9, 平特尾普通:1.75, 平特尾0:2,
+  连尾普通:{2:2.9,3:6,4:15,5:40}, 连尾带0:{2:3.5,3:7.5,4:18,5:45},
+  波色:{红:2.7,绿:2.8,蓝:2.8},
+  半波:{绿双:6.5,红大:6.5,蓝小:6.5,绿小:6.5,红双:5,蓝大:5}, 半波默认:5.5,
+  不中:{5:2,6:2.5,7:3,8:3.5,9:4,10:5,11:6,12:7.5}
+};
+const _oldParseBetTotal=parseBetTotal;
+const _oldParseBetMaps=parseBetMaps;
+
+// ===== 新增：完整移植“最新统计没后台1.0”的特码解析逻辑 =====
+// 只接管特码/普通号码解析；现有平特一肖、平特号码、赔率、中奖、开奖接口均保持原逻辑。
+function specialPreprocessV1(input) {
+  // ===== 新增：支持聊天中常见的间隔点 · / • / ・，仅作为号码分隔符 =====
+  input = String(input ?? '').replace(/[·•・]/g, '.');
+
+    input = toHalfWidth(input).trim();
+    // 新增输入容错：常见误输/识别错误。“免”按“兔”，“名”按“各”处理。
+    input = input.replace(/免/g,'兔').replace(/名/g,'各');
+    input = input.replace(/(各号|各数|各|个|每个|每号)\s+(?=[零一二三四五六七八九十百千0-9])/g,'$1');
+
+    // 新增：金额后的空格可作为“下一笔号码”的安全边界。
+    // 例：牛各号 50 05 06各50 => 牛各号50 # 05 06各50。
+    // 只在后面明确存在“号码列表 + 各/各号 + 金额”时切开，不影响普通号码之间的空格。
+    input = input.replace(/((?:各号|各)\s*[零一二三四五六七八九十百千0-9]+(?:\.\d+)?)\s+(?=(?:\d{1,2}\s+)+\d{1,2}\s*(?:各号|各|个|每个|每号)\s*[零一二三四五六七八九十百千0-9]+)/g, '$1 # ');
+
+    // OCR/手写习惯纠错：数字上下文中的 o / O 视为数字 0。
+    // 只在紧邻数字、数字分隔符或金额单位/“各”等明确数字环境时转换，
+    // 避免把普通英文单词里的 o/O 改成 0。
+    input = input.replace(/([0-9])\s*[oO](?=[0-9\s.,，。+\-、各个号数米元块]|$)/g, '$10');
+    input = input.replace(/(^|[\s.,，。+\-、#])\s*[oO](?=[0-9])/g, '$10');
+
+    // 多行安全隔离：默认每一行独立解析，防止上一行金额与下一行号码串在一起。
+    // 但允许一种高确定性的“纯号码列表跨行续写”：
+    // 上一行只有号码/分隔符、没有金额；下一行继续号码并明确出现“各/各号/各数/个 + 金额”。
+    // 例：07.31.01.25.04.28.22.34.\n05.29.23.35.各五 应视为同一笔。
+    if (/[\r\n]/.test(input)) {
+        const rawLines = input.split(/\r?\n+/).map(s => s.trim()).filter(Boolean);
+        const mergedLines = [];
+        for (let i = 0; i < rawLines.length; i++) {
+            let line = rawLines[i];
+            while (i + 1 < rawLines.length) {
+                const next = rawLines[i + 1];
+                const currentNums = line.match(/\d{1,2}/g) || [];
+                const currentIsPureNumList = currentNums.length >= 2 &&
+                    /^(?:(?:澳门|香港)\s*)?[\s\d.,，。+\-、]+$/.test(line) &&
+                    !/(?:各|个|号|数|头|尾|米|元|块|买|下|投|压)/.test(line);
+                const nextCompletesBet = /^(?:\s*\d{1,2}\s*(?:[.,，。+\-、]\s*|\s+))+\d{1,2}\s*[.,，。+\-、]*\s*(?:各号各|各各|各个|各号|各数|个数|号各|数各|个号|号个|各|个)\s*[零一二三四五六七八九十百千0-9]+(?:\.\d+)?\s*(?:米|元|块钱|块)?[，。,.；;\s]*$/.test(next);
+                if (!(currentIsPureNumList && nextCompletesBet)) break;
+                // 跨行纯号码续写时用点号保留“号码列表”边界，避免后续把“10 20 ... 48各号5米”
+                // 误识别成多笔“单号+金额”。只影响这种明确的跨行号码续写。
+                const nextBet = next.match(/^((?:\s*\d{1,2}\s*(?:[.,，。+\-、]\s*|\s+))+\d{1,2})\s*[.,，。+\-、]*\s*((?:各号各|各各|各个|各号|各数|个数|号各|数各|个号|号个|各|个)\s*[零一二三四五六七八九十百千0-9]+(?:\.\d+)?\s*(?:米|元|块钱|块)?)/);
+                if(nextBet){
+                    const leftNums=(line.match(/\d{1,2}/g)||[]);
+                    const rightNums=(nextBet[1].match(/\d{1,2}/g)||[]);
+                    line=leftNums.concat(rightNums).join('.')+nextBet[2];
+                }else{
+                    line += ' ' + next;
+                }
+                i++;
+            }
+            mergedLines.push(line);
+        }
+        return mergedLines.map(line => specialPreprocessV1(line)).filter(Boolean).join('#');
+    }
+
+    // 新增兼容：只处理“号码/组 + 各各/各个 + 金额”这类明确重复写法
+    // 01各各5 -> 01各5；11各个5 -> 11各5
+    input = input.replace(/各{2,}(?=\s*\d)/g, '各');
+    input = input.replace(/各个(?=\s*\d)/g, '各');
+    input = input.replace(/两/g, '二');
+    input = input.replace(/[（(【\[]/g, ' ').replace(/[）)】\]]/g, ' ');
+
+    // 新增：连续生肖的按肖金额写法兼容。只处理“生肖序列 + 各/包肖/包销 + 明确金额”，不碰“各号”。
+    // 马 龙 羊各十块 / 马 龙 羊包肖十块 / 马 龙 羊包销十块 => 马龙羊各十块。
+    input = input.replace(/((?:[鼠牛虎兔龙蛇马羊猴鸡狗猪]\s*){2,})(?:包肖|包销|各)(?=\s*[零一二三四五六七八九十百千0-9])/g,
+      (m, zs) => zs.replace(/\s+/g,'') + '各');
+
+    // ===== 新增识别率增强层：只处理语义明确的输入习惯，不改变后续原有算法 =====
+    // 新增：买 + 数字头/尾 时，“买”只作为聊天动词忽略。
+    // 例：今晚买1头各号10 -> 今晚 1头各号10；买3尾各号20 -> 3尾各号20
+    input = input.replace(/买(?=\s*\d+\s*(?:头|尾))/g, ' ');
+
+    // 1) “买”只是句首/连接动词时，不让它被后面的通用“买=>各号”规则误当成“每个号码”。
+    //    例：买牛羊各50 -> 牛羊各50（仍按每个生肖总额计算）。
+    input = input.replace(/买(?=\s*(?:[鼠牛虎兔龙蛇马羊猴鸡狗猪]|\d{1,2}(?:\s|[.，,、+\-\/]|$)|家肖|家禽|野兽|野肖|大单|小单|大双|小双|红|蓝|绿|大数|小数))/g, ' ');
+
+    // 2) 支持“单个号码 + 金额单位”的省略写法。必须带“米/元/块”等金额单位才转换，避免把普通号码列表误判。
+    //    例：44.十米 / 44十米 / 44=10元 -> 44各号十 / 44各号十 / 44各号10。
+    //    像 36.48 这种没有金额单位的写法绝不在这里转换。
+    input = input.replace(/(^|[\s，,。;；|])([0-9]{1,2})\s*(?:[.。:：=]\s*)?([零一二三四五六七八九十百千0-9]+(?:\.[0-9]+)?)\s*(?:米|元|块钱|块)(?=\s|[，,。;；|]|$)/g,
+      (match, prefix, num, amount) => {
+        const n = String(parseInt(num, 10)).padStart(2, '0');
+        return numbers.includes(n) ? prefix + n + '各号' + amount : match;
+      });
+
+    // 3) 支持多人聊天常见的“号码后面逐个带号”写法，只做语义明确的归一化。
+    //    例：1号17号各5 -> 01 17各号5。必须至少两个“号码+号”，并且最后明确出现“各+金额”。
+    input = input.replace(/(^|[\s，,。;；|])((?:\d{1,2}\s*号\s*){2,})各(?:号)?\s*([零一二三四五六七八九十百千0-9]+(?:\.[0-9]+)?)(?=\s|[，,。;；|]|$)/g,
+      (match, prefix, seq, amount) => {
+        const list = [...seq.matchAll(/(\d{1,2})\s*号/g)]
+          .map(m => String(parseInt(m[1], 10)).padStart(2, '0'))
+          .filter(n => numbers.includes(n));
+        return list.length >= 2 ? prefix + list.join(' ') + '各号' + amount : match;
+      });
+
+    // 4) 支持“单个号码+号+金额”的省略写法。
+    //    例：20号5 -> 20各号5。只在完整分段边界内转换，防止把一句话中间的“20号”误判。
+    input = input.replace(/(^|[\s，,。;；|])(\d{1,2})\s*号\s*([零一二三四五六七八九十百千0-9]+(?:\.[0-9]+)?)(?=\s|[，,。;；|]|$)/g,
+      (match, prefix, num, amount) => {
+        const n = String(parseInt(num, 10)).padStart(2, '0');
+        return numbers.includes(n) ? prefix + n + '各号' + amount : match;
+      });
+
+    input = input.replace(/(?:下注|各下|投|压|下)/g, ' ');
+    // 同一行连续多笔下注安全隔离：金额单位本身就是上一笔金额结束的明确边界。
+    // 例：05各60米03各40米13各75，避免删除“米”后变成 6003。
+    // 用内部 # 隔离，不改变任何单笔下注的金额/号码逻辑。
+    input = input.replace(/(?:元|块钱|块|米)/g, ' # ');
+    input = input.replace(/(?:每个号码买|每个号码|各号码买|各号码|每个|每号|每码|每肖|每只|各个|各只)/g, '各号');
+    // 新增："各号各"与"各"同义，只做明确同义归一化。例：01 02各号各5 -> 01 02各号5
+    input = input.replace(/各号各/g, '各号');
+    input = input.replace(/(?:各数|个数|号各|买)/g, '各号');
+    input = input.replace(/尾数/g, '尾');
+    input = input.replace(/头数/g, '头');
+    input = input.replace(/红波单|红单波/g, '红单');
+    input = input.replace(/红波双|红双波/g, '红双');
+    input = input.replace(/蓝波单|蓝单波/g, '蓝单');
+    input = input.replace(/蓝波双|蓝双波/g, '蓝双');
+    input = input.replace(/绿波单|绿单波/g, '绿单');
+    input = input.replace(/绿波双|绿双波/g, '绿双');
+    input = input.replace(/特码/g, '');
+
+    const symbols = ['+', '/', '-', '.', ',', '、'];
+    input = input.replace(/(?<=\d)。|。(?![一-龥a-zA-Z])/g, ' ');
+    input = input.replace(/(?<=\d)。|。(?![一-龥])(?=\d)/g, ' ');
+    input = input.replace(/[、，。,]+(?=\s*各号?\d)/g, ' ');
+    symbols.forEach(symbol => {
+        input = input.split(symbol).join(' ');
+    });
+    const zodiac = ['鼠','牛','虎','兔','龙','蛇','马','羊','猴','鸡','狗','猪'];
+    // ===== 新增安全修复：生肖之间只清理明确分隔符，绝不吞数字/金额 =====
+    // 原写法使用 [^一-龥]*?，会把数字也当成“非中文”删除；现在只允许空格和常见标点。
+    const zodiacRegex = new RegExp(`(${zodiac.join('|')})[\\s，。,.、:：;；|+\\-]*?(?=(${zodiac.join('|')}))`, 'g');
+    input = input.replace(zodiacRegex, (match, p1, p2) => p1);
+    const zodiacToGeRegex = new RegExp(`(${zodiac.join('|')})[\\s，。,.、:：;；|+\\-]*?(?=各)`, 'g');
+    input = input.replace(zodiacToGeRegex, (match, p1) => p1);
+    input = input.replace(/=/g, '各');
+    input = input.replace(/(\d+)[，。](?=\d{1,2}[^一-龥]*各)/g, '$1 ');
+
+    input = input.replace(/([一二三四五六七八九]?千[一二三四五六七八九]?百?[一二三四五六七八九]?十?[一二三四五六七八九]?|[一二三四五六七八九]?百[一二三四五六七八九]?十?[一二三四五六七八九]?|[一二三四五六七八九]?十[一二三四五六七八九]?)/g, match => {
+        const map = { '零': 0, '一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9 };
+        const unit = { '十': 10, '百': 100, '千': 1000 };
+        let result = 0, temp = 0, lastUnit = 1, hasUnit = false;
+        for (let i = 0; i < match.length; i++) {
+            const char = match[i];
+            if (char in map) {
+                temp = map[char];
+            } else if (char in unit) {
+                if (temp === 0 && char === '十') temp = 1;
+                result += temp * unit[char];
+                lastUnit = unit[char];
+                temp = 0;
+                hasUnit = true;
+            }
+        }
+        if (temp > 0 && hasUnit) {
+            if (lastUnit === 100) result += temp * 10;
+            else if (lastUnit === 10) result += temp;
+            else result += temp;
+        } else {
+            result += temp;
+        }
+        return result;
+    });
+
+    const singleDigitMap = { '零': '0', '一': '1', '二': '2', '三': '3', '四': '4', '五': '5', '六': '6', '七': '7', '八': '8', '九': '9' };
+    input = input.replace(/[零一二三四五六七八九]/g, ch => singleDigitMap[ch]);
+
+    // ===== 新增修复：严格区分“生肖总额”与“每个号码金额”，不改原有逻辑 =====
+    // 明确“每个号码”的写法先标准化；例如：牛羊各号买50 = 牛羊各号50（8个号码×50=400）
+    input = input.replace(/各号买/g, '各号');
+
+    // 原有“牛羊各50 / 牛羊个50”属于“每个生肖总额”，原规则只在行首/空格后生效。
+    // 新增兜底：当前面带“买、好”等普通字符时，也按原生肖总额规则拆分。
+    // 例：买牛羊各50、好牛羊个50 -> 牛总50 + 羊总50 = 100；
+    // 但“牛羊各号50 / 各数50 / 个号50 / 号各50 / 各号买50 / 各号码50 / 每个号码50”不会进入这里。
+    input = input.replace(/([^鼠牛虎兔龙蛇马羊猴鸡狗猪\s])([鼠牛虎兔龙蛇马羊猴鸡狗猪]+)(?:肖)?\s*(?:各|个)\s*(\d+(?:\.\d+)?)(?=\s|$)/g,
+    (match, prefixChar, zodiacText, amount) => {
+        const expanded = zodiacText.split('').map(zodiac => {
+            const nums = zodiacNumbers[zodiac];
+            if (!nums || !nums.length) return zodiac + '各号' + amount;
+            const divisor = (nums.length === 5) ? 5 : 4;
+            const perNum = parseFloat(amount) / divisor;
+            return zodiac + '各号' + formatBetAmount(perNum);
+        }).join(' ');
+        return prefixChar + ' ' + expanded;
+    });
+
+    // ✅ 支持：牛羊20 / 牛羊肖20 / 牛羊猪肖各10 / 狗肖10
+input = input.replace(/(^|\s)([鼠牛虎兔龙蛇马羊猴鸡狗猪]+)(?:肖)?\s*各?\s*(\d+(?:\.\d+)?)(?=\s|$)/g, 
+(match, prefix, zodiacText, amount) => {
+    const expanded = zodiacText.split('').map(zodiac => {
+        const nums = zodiacNumbers[zodiac];
+        if (!nums || !nums.length) return zodiac + '各号' + amount;
+
+        const divisor = (nums.length === 5) ? 5 : 4;
+        const perNum = parseFloat(amount) / divisor;
+
+        return zodiac + '各号' + formatBetAmount(perNum);
+    }).join(' ');
+
+    return prefix + expanded;
+});
+
+    // 先把“02 06各1000 / 03 04 05各2000”这类纯号码列表，预展开成标准格式，避免大金额被截断
+    input = input.replace(/\b((?:\d{1,2}\s+)+\d{1,2})\s*各(?:号)?\s*(\d+(?:\.\d+)?)(?=\s|$)/g, (match, numText, amount) => {
+        const parts = numText.split(/\s+/).map(n => n.padStart(2, '0')).filter(n => numbers.includes(n));
+        return parts.length ? parts.map(n => n + '各号' + amount).join(' ') : match;
+    });
+
+    // 新增：连续头数/波色共享后面的金额。
+    // 1头2头（无金额）保持原样，不产生下注；1头2头各号10 => 12头各号10。
+    // 红波蓝波各号10 => 红蓝波各号10，后续按两种波色全部展开。
+    input = input.replace(/((?:\d头){2,})\s*(各号|各数|个号|每个|每号|各|个)\s*(\d+(?:\.\d+)?)/g,
+      (m, seq, conn, amount) => (seq.match(/\d(?=头)/g)||[]).join('')+'头各号'+amount);
+    input = input.replace(/((?:(?:红|蓝|绿)波){2,})\s*(各号|各数|个号|每个|每号|各|个)\s*(\d+(?:\.\d+)?)/g,
+      (m, seq, conn, amount) => (seq.match(/[红蓝绿](?=波)/g)||[]).join('')+'各号'+amount);
+
+    // 把紧凑写法统一改成“各号”标准格式，避免后面重复计算
+    input = input.replace(/((?:家肖|家禽|野兽|野肖|大单|小单|大双|小双|红单|红双|蓝单|蓝双|绿单|绿双|红蓝绿|红蓝|红绿|蓝绿|大数|小数|[0-9]+头|[0-9]+尾|[鼠牛虎兔龙蛇马羊猴鸡狗猪]+|[红蓝绿]波))\s*(\d+)(?!\d)/g, '$1各号$2');
+    input = input.replace(/各\s*(\d+)/g, '各号$1');
+    input = input.replace(/号号/g, '号');
+
+    input = input.replace(/大数各号(\d+)/g, (match, number) => {
+        const big = [];
+        for (let i = 25; i <= 49; i++) big.push(i.toString().padStart(2, '0'));
+        return big.join(' ') + '各号' + number;
+    });
+    input = input.replace(/小数各号(\d+)/g, (match, number) => {
+        const small = [];
+        for (let i = 1; i <= 24; i++) small.push(i.toString().padStart(2, '0'));
+        return small.join(' ') + '各号' + number;
+    });
+
+    input = input.replace(/([0-9]+)头各号(\d+)/g, (match, heads, number) => {
+        const results = [];
+        for (let i = 1; i < 50; i++) {
+            const numStr = i.toString().padStart(2, '0');
+            if (heads.includes(numStr[0])) results.push(numStr);
+        }
+        return results.join(' ') + '各号' + number;
+    });
+
+    input = input.replace(/([0-9]+)尾各号(\d+)/g, (match, tails, number) => {
+        const results = [];
+        for (let i = 1; i < 50; i++) {
+            const numStr = i.toString().padStart(2, '0');
+            if (tails.includes(numStr[1])) results.push(numStr);
+        }
+        return results.join(' ') + '各号' + number;
+    });
+
+    const oddNumbers = "01 03 05 07 09 11 13 15 17 19 21 23 25 27 29 31 33 35 37 39 41 43 45 47 49";
+    const evenNumbers = "02 04 06 08 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 42 44 46 48";
+    input = input.replace(/单数/g, oddNumbers);
+    input = input.replace(/双数/g, evenNumbers);
+
+    input = input.replace(/\s+/g, ' ').trim();
+    
+    // ✅ 终极稳定修复：避免金额粘连与“.”导致重复解析（不改原逻辑）
+    // 1) 只断“米”后面紧跟数字的情况
+    input = input.replace(/(\d+(?:\.\d+)?)米(?=\d)/g, '$1 ');
+    // 2) 统一把 . , ， 。 转为空格（彻底消除连写）
+    input = input.replace(/[，。]+/g, ' ');
+    // 3) 仅当整串数字可以完整拆成有效号码(01-49)时，才两两补空格，避免把 1000 误拆成 10 00
+    input = input.replace(/\b\d{4,}\b/g, token => {
+        if (token.length % 2 !== 0) return token;
+        const parts = token.match(/\d{2}/g) || [];
+        return parts.length && parts.every(part => numbers.includes(part)) ? parts.join(' ') : token;
+    });
+    // 4) 清理多余空格
+    input = input.replace(/\s+/g, ' ').trim();
+
+    // 4.1) 新增：把已经明确的“号码列表 + 各号金额”统一拆成独立标准组。
+    //      这样头/尾/大数/小数等展开结果只会被计算一次，避免“兜底规则 + 主规则”重复统计。
+    input = input.replace(/(?<!各号)(?<!\d)((?:\d{1,2}\s+)+\d{1,2})\s*各号(\d+(?:\.\d+)?)(?=\s|#|$)/g,
+      (match, numText, amount) => {
+        const parts = numText.split(/\s+/).map(n => n.padStart(2, '0')).filter(n => numbers.includes(n));
+        return parts.length ? parts.map(n => n + '各号' + amount).join('#') : match;
+      });
+
+    // 5) 新增“已完成下注组”内部边界，防止相邻组被号码列表兜底规则串读。
+    //    例如：36各号20 48各号20，不能再被误读成“20 48各号20”。
+    //    # 只作为内部解析边界，不参与任何下注含义。
+    input = input.replace(/(各号\d+(?:\.\d+)?)\s+(?=(?:\d{1,2}|[鼠牛虎兔龙蛇马羊猴鸡狗猪]|红|蓝|绿|家肖|家禽|野兽|野肖|大单|小单|大双|小双|大数|小数))/g, '$1#');
+
+    return input;
+}
+
+function specialOnlyTextV1(raw){
+  // 平特相关内容继续交给做账表原有平特逻辑，绝不进入特码解析。
+  return String(raw||'').split(/\r?\n/).filter(line=>!/平特/.test(line)).join('\n');
+}
+
+function specialParseMapV1(rawInput){
+  const result=Object.fromEntries(numbers.map(n=>[n,0]));
+  const apply=(num,delta)=>{
+    num=String(num||'').padStart(2,'0');
+    if(!numbers.includes(num))return;
+    const v=+delta||0;
+    result[num]=(result[num]||0)+v;
+    if(result[num]<0)result[num]=0;
+  };
+  rawInput=specialOnlyTextV1(rawInput);
+let input = rawInput.replace(/香港|港|香/g, ' ').trim();
+        const isSubtractMode = /^减\s*/.test(input);
+        input = input.replace(/^减\s*/, '');
+        input = specialPreprocessV1(input);
+        const betSign = isSubtractMode ? -1 : 1;
+
+        // 先兜底处理：02 06各1000、03 04 05各2000 这类纯号码列表
+        const directNumberListRegex = /\b((?:\d{1,2}\s+)+\d{1,2})\s*各(?:号)?\s*(\d+(?:\.\d+)?)(?=\s|$)/g;
+        let directMatch;
+        while ((directMatch = directNumberListRegex.exec(input)) !== null) {
+            const numList = directMatch[1].split(/\s+/).map(n => n.padStart(2, '0')).filter(n => numbers.includes(n));
+            const betAmount = parseFloat(directMatch[2]);
+            numList.forEach(num => {
+                apply(num, betSign * betAmount);
+            });
+        }
+
+        const regex = /(\d+(?:[ ,.+\-~=%\/”]+\d{1,2})*)\s*(?:个|各|各号码买|各号码|每个号码买|每个号码|肖个号|肖个数|肖各号|码各|码个|一个买|一个)(?:数|号)?(\d+(?:\.\d+)?)|([一-龥]+)\s*(?:号)?(?:个|各|各号码买|各号码|每个号码买|每个号码|肖个号|肖个数|肖各号|码各|码个|一个买|一个)(?:数|号)?(\d+(?:\.\d+)?)(?:[快块米])?/g;
+        let match;
+
+        while ((match = regex.exec(input)) !== null) {
+            if (match[1] && match[2]) {
+                let numList = match[1].split(/[ ,./+、，。;；:：|\-~=%\”]+/).map(n => n.padStart(2, '0')).filter(n => numbers.includes(n));
+                let betAmount = parseFloat(match[2]);
+                numList.forEach(num => {
+                    apply(num, betSign * betAmount);
+                });
+            } else if (match[3] && match[4]) {
+                let betAmount = parseFloat(match[4]);
+                let zodiacList = match[3].split("");
+                zodiacList.forEach(zodiac => {
+                    if (zodiacNumbers[zodiac]) {
+                        zodiacNumbers[zodiac].forEach(num => {
+                            apply(num, betSign * betAmount);
+                        });
+                    }
+                });
+            }
+        }
+
+        const colorRegex = /(红|蓝|绿)波\s*(?:各号|各数|个号|号个|个数|数个|数各|号各|各号码|各号码买|每个号码|每个号码买)\s*(\d+(?:\.\d+)?)/g;
+        let colorMatch;
+        while ((colorMatch = colorRegex.exec(input)) !== null) {
+            let color = colorMatch[1];
+            let amount = parseFloat(colorMatch[2]);
+            let nums = colorMap[color];
+            nums.forEach(num => {
+                apply(num, betSign * amount);
+            });
+        }
+
+        const multiColorRegex = /((?:红|蓝|绿){2,})\s*(?:各号|各数|个号|号个|个数|数个|数各|号各|各号码|各号码买|每个号码|每个号码买)\s*(\d+(?:\.\d+)?)/g;
+        let multiColorMatch;
+        while ((multiColorMatch = multiColorRegex.exec(input)) !== null) {
+            let colors = multiColorMatch[1].split("");
+            let amount = parseFloat(multiColorMatch[2]);
+            colors.forEach(color => {
+                if (colorMap[color]) {
+                    colorMap[color].forEach(num => {
+                        apply(num, betSign * amount);
+                    });
+                }
+            });
+        }
+
+        const colorOddEvenRegex = /(红|蓝|绿)(波)?(单|双)\s*(?:各号)?\s*(\d+(?:\.\d+)?)/g;
+        let coeMatch;
+        while ((coeMatch = colorOddEvenRegex.exec(input)) !== null) {
+            let color = coeMatch[1];
+            let oddEven = coeMatch[3];
+            let amount = parseFloat(coeMatch[4]);
+            let nums = colorMap[color].filter(num => {
+                let n = parseInt(num);
+                return oddEven === "单" ? n % 2 === 1 : n % 2 === 0;
+            });
+            nums.forEach(num => {
+                apply(num, betSign * amount);
+            });
+        }
+
+        const homeAnimalsRegex = /(家肖|家禽)\s*各?号?(\d+(?:\.\d+)?)/g;
+        let homeMatch;
+        while ((homeMatch = homeAnimalsRegex.exec(input)) !== null) {
+            let amount = parseFloat(homeMatch[2]);
+            let group = ["牛", "羊", "马", "猪", "狗", "鸡"];
+            group.forEach(zodiac => {
+                if (zodiacNumbers[zodiac]) {
+                    zodiacNumbers[zodiac].forEach(num => {
+                        apply(num, betSign * amount);
+                    });
+                }
+            });
+        }
+
+        const wildAnimalsRegex = /(野兽|野肖)\s*各?号?(\d+(?:\.\d+)?)/g;
+        let wildMatch;
+        while ((wildMatch = wildAnimalsRegex.exec(input)) !== null) {
+            let amount = parseFloat(wildMatch[2]);
+            let group = ["猴", "鼠", "龙", "蛇", "虎", "兔"];
+            group.forEach(zodiac => {
+                if (zodiacNumbers[zodiac]) {
+                    zodiacNumbers[zodiac].forEach(num => {
+                        apply(num, betSign * amount);
+                    });
+                }
+            });
+        }
+
+const numberEachRegex = /((?:\d{1,2}|[一-龥])+(?:[ ,.+\-~=%\/”、，。;；:：|]?)+(?:\d{1,2}|[一-龥])+?)\s*数个\s*(\d+(?:\.\d+)?)/g;
+let numberEachMatch;
+while ((numberEachMatch = numberEachRegex.exec(input)) !== null) {
+    let entries = numberEachMatch[1].split(/[ ,./+、，。;；:：|\-~=%\”]+/);
+    let betAmount = parseFloat(numberEachMatch[2]);
+    entries.forEach(entry => {
+        if (numbers.includes(entry.padStart(2, '0'))) {
+            let num = entry.padStart(2, '0');
+            apply(num, betSign * betAmount);
+        } else if (zodiacNumbers[entry]) {
+            zodiacNumbers[entry].forEach(num => {
+                apply(num, betSign * betAmount);
+            });
+        } else if (colorMap[entry]) {
+            colorMap[entry].forEach(num => {
+                apply(num, betSign * betAmount);
+            });
+        }
+    });
+}
+
+const specialGroups = {
+    "大单": numbers.filter(n => parseInt(n) >= 25 && parseInt(n) % 2 === 1),
+    "小单": numbers.filter(n => parseInt(n) <= 24 && parseInt(n) % 2 === 1),
+    "大双": numbers.filter(n => parseInt(n) >= 25 && parseInt(n) % 2 === 0),
+    "小双": numbers.filter(n => parseInt(n) <= 24 && parseInt(n) % 2 === 0),
+};
+
+const specialRegex = /(大单|小单|大双|小双)\s*(?:各号|各数|号各|数各|个号|各号码|各号码买|每个号码|每个号码买)?\s*(\d+(?:\.\d+)?)/g;
+let specialMatch;
+while ((specialMatch = specialRegex.exec(input)) !== null) {
+    const group = specialMatch[1];
+    const amount = parseFloat(specialMatch[2]);
+    const nums = specialGroups[group];
+    nums.forEach(num => {
+        apply(num, betSign * amount);
+    });
+}
+
+const comboRegex = /((?:大单|小单|大双|小双){2,})\s*(?:各号|各数|号各|数各|个号|各号码|各号码买|每个号码|每个号码买)?\s*(\d+(?:\.\d+)?)/g;
+let comboMatch;
+while ((comboMatch = comboRegex.exec(input)) !== null) {
+    let comboText = comboMatch[1];
+    let amount = parseFloat(comboMatch[2]);
+    let parts = comboText.match(/大单|小单|大双|小双/g);
+    parts.forEach(part => {
+        const nums = specialGroups[part];
+        nums.forEach(num => {
+            apply(num, betSign * amount);
+        });
+    });
+}
+
+        
+  return result;
+}
+
+function specialParseTotalV1(raw){
+  return Object.values(specialParseMapV1(raw)).reduce((a,v)=>a+(+v||0),0);
+}
+
+function logicalBetLinesV1(raw){
+  // 新增：同一行“金额 + 空格 + 下一组下注”先切成逻辑小段。
+  // 例：牛各号 50 05 06各50。只在右侧明确是另一笔下注时切分。
+  raw=String(raw||'').replace(/((?:各号|各)\s*[零一二三四五六七八九十百千0-9]+(?:\.\d+)?)\s+(?=(?:\d{1,2}(?:\s+|[.，,、+\-\/])+)+\d{1,2}\s*(?:各号|各|个|每个|每号)\s*[零一二三四五六七八九十百千0-9]+)/g,'$1\n');
+  const rawLines=String(raw||'').split(/\r?\n+/).map(x=>x.trim()).filter(Boolean);
+  const logical=[];
+  for(let i=0;i<rawLines.length;i++){
+    let line=rawLines[i];
+    while(i+1<rawLines.length){
+      const next=rawLines[i+1];
+      const currentNums=line.match(/\d{1,2}/g)||[];
+      const currentIsPureNumList=currentNums.length>=2 &&
+        /^(?:(?:澳门|香港)\s*)?[\s\d.,，。+\-、]+$/.test(line) &&
+        !/(?:各|个|号|数|头|尾|米|元|块|买|下|投|压)/.test(line);
+      const nextCompletesBet=/^(?:\s*\d{1,2}\s*(?:[.,，。+\-、]\s*|\s+))+\d{1,2}\s*[.,，。+\-、]*\s*(?:各号各|各各|各个|各号|各数|个数|号各|数各|个号|号个|各|个)\s*[零一二三四五六七八九十百千0-9]+(?:\.\d+)?\s*(?:米|元|块钱|块)?[，。,.；;\s]*$/.test(next);
+      if(!(currentIsPureNumList&&nextCompletesBet))break;
+      line+=' '+next;
+      i++;
+    }
+    logical.push(line);
+  }
+  return logical;
+}
+
+function residualBetPartsV1(raw){
+  const specialMap=Object.fromEntries(numbers.map(n=>[n,0]));
+  let legacyFlatTotal=0;
+  const legacyFlatMap=Object.fromEntries(numbers.map(n=>[n,0]));
+
+  logicalBetLinesV1(raw).forEach(line=>{
+    // 仍先经过现有 marketJudge，确保平特一肖/平肖/其它市场玩法继续由原逻辑处理。
+    const mkLine=marketJudge(line,null);
+    // 如果这一行没有被市场/平特/特肖规则识别，保留原始文本交给特码解析器。
+    // 避免“一百五”被 marketJudge 的通用中文金额转换提前变成105。
+    const rest=mkLine.stakeTotal>0?(mkLine.rest||''):line;
+
+    // 参考文件的特码解析只处理 marketJudge 未处理的残余内容。
+    const oneSpecial=specialParseMapV1(rest);
+    numbers.forEach(n=>{specialMap[n]+=(+oneSpecial[n]||0)});
+
+    // 原有“直接平特号码”解析完全保留。
+    const oldMaps=_oldParseBetMaps(rest);
+    numbers.forEach(n=>{
+      const v=+(oldMaps.flat&&oldMaps.flat[n]||0);
+      legacyFlatMap[n]+=v;
+      legacyFlatTotal+=v;
+    });
+  });
+
+  return {specialMap,legacyFlatMap,legacyFlatTotal};
+}
+
+function legacyFlatMapV1(raw){
+  const m=_oldParseBetMaps(raw||'');
+  return (m&&m.flat)||{};
+}
+
+function C(n,k){n=+n;k=+k;if(k<0||n<k)return 0;if(k===0||n===k)return 1;k=Math.min(k,n-k);let r=1;for(let i=1;i<=k;i++)r=r*(n-k+i)/i;return Math.round(r)}
+function U(a){return [...new Set(a)]}
+function normMarket(s){
+  s=toHalfWidth(String(s||'')).replace(/两/g,'二').replace(/[·•・、，。；;：:|]/g,' ');
+  // 新增：只有“平”后面是号码数字时，按“平码”处理；平+生肖仍保持原平特逻辑。
+  s=s.replace(/平\s*(?=\d)/g,'平码 ');
+  s=s.replace(/(各号|各数|各|个|每个|每号)\s+(?=[零一二三四五六七八九十百千0-9])/g,'$1');
+  // 金额空格边界：仅当后面明确是另一组“号码+各/各号+金额”时插入内部分隔。
+  s=s.replace(/((?:各号|各)\s*[零一二三四五六七八九十百千0-9]+(?:\.\d+)?)\s+(?=(?:\d{1,2}\s+)+\d{1,2}\s*(?:各号|各|个|每个|每号)\s*[零一二三四五六七八九十百千0-9]+)/g,'$1 # ');
+  const map={'零':'0','一':'1','二':'2','三':'3','四':'4','五':'5','六':'6','七':'7','八':'8','九':'9'};
+  s=s.replace(/([一二三四五六七八九]?十[一二三四五六七八九]?|[一二三四五六七八九]百[一二三四五六七八九]?十?[一二三四五六七八九]?)/g,m=>{const d={'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9};let v=0;if(m.includes('百')){let [a,b='']=m.split('百');v=(d[a]||0)*100;if(b.includes('十')){let [c,e='']=b.split('十');v+=(d[c]||1)*10+(d[e]||0)}else v+=d[b]||0}else if(m.includes('十')){let[a,b='']=m.split('十');v+=(d[a]||1)*10+(d[b]||0)}return String(v)});
+  s=s.replace(/[零一二三四五六七八九]/g,ch=>map[ch]);
+  return s.replace(/\s+/g,' ').trim();
+}
+function zList(t){return (String(t||'').match(/[鼠牛虎兔龙蛇马羊猴鸡狗猪]/g)||[])}
+function nList(t){return U((String(t||'').match(/(?:^|[^\d])(0?[1-9]|[1-4]\d)(?=[^\d]|$)/g)||[]).map(x=>(x.match(/\d+/)||[''])[0]).filter(Boolean).map(x=>String(+x).padStart(2,'0')).filter(x=>numbers.includes(x)))}
+function tailList(t){return U((String(t||'').match(/\d/g)||[]))}
+function marketJudge(raw,draw){
+  let work=normMarket(raw), stakeTotal=0,flatStakeTotal=0,specialStakeTotal=0,payout=0,flatPayout=0,specialPayout=0,flatWinStake=0,specialWinStake=0,normalCodeStakeTotal=0,normalCodeWinStake=0,normalCodePayout=0,specialZodiacStakeTotal=0,specialZodiacWinStake=0,specialZodiacPayout=0,labels=[];
+  // 平码单独一行时，后续每一行“号码+各/个+金额”都继承平码。
+  // 分行分别走原有平码规则再汇总，避免跨行金额/号码粘连或残余层重复计数。
+  const rawPing=toHalfWidth(String(raw||'')).replace(/[\u200B-\u200D\uFEFF]/g,'').replace(/\r/g,'').replace(/^\s*(?:澳门|香港)\s*/,'');
+  if(/^\s*平码\s*\n/.test(rawPing)){
+    const pingLines=rawPing.split(/\n+/).map(x=>x.trim()).filter(Boolean);
+    if(pingLines[0]==='平码' && pingLines.length>1){
+      const parts=pingLines.slice(1).map(x=>marketJudge(/^平码/.test(x)?x:'平码 '+x,draw));
+      const sum=k=>parts.reduce((a,v)=>a+(+v[k]||0),0);
+      return {
+        stakeTotal:sum('stakeTotal'),flatStakeTotal:sum('flatStakeTotal'),specialStakeTotal:sum('specialStakeTotal'),
+        normalCodeStakeTotal:sum('normalCodeStakeTotal'),normalCodeWinStake:sum('normalCodeWinStake'),normalCodePayout:sum('normalCodePayout'),
+        payout:sum('payout'),flatPayout:sum('flatPayout'),specialPayout:sum('specialPayout'),
+        flatWinStake:sum('flatWinStake'),specialWinStake:sum('specialWinStake'),
+        specialZodiacStakeTotal:sum('specialZodiacStakeTotal'),specialZodiacWinStake:sum('specialZodiacWinStake'),specialZodiacPayout:sum('specialZodiacPayout'),
+        labels:parts.flatMap(v=>v.labels||[]),rest:parts.map(v=>v.rest||'').filter(Boolean).join(' ')
+      };
+    }
+  }
+  const normal=(draw&&draw.normal||[]).map(x=>String(x.number).padStart(2,'0'));
+  const nset=new Set(normal);
+  const nz=new Set((draw&&draw.normal||[]).map(x=>x&&x.zodiac?simpZodiac(x.zodiac):zodiacOf(String(x.number).padStart(2,'0'))));
+  const nt=new Set(normal.map(x=>x[1]));
+  const sp=draw&&draw.special?String(draw.special.number).padStart(2,'0'):'';
+  const sz=draw&&draw.special&&draw.special.zodiac?simpZodiac(draw.special.zodiac):zodiacOf(sp);
+  const allDrawZ=new Set([...nz,sz].filter(Boolean));
+  const sc=sp?(ballColor(sp)==='red'?'红':ballColor(sp)==='blue'?'蓝':'绿'):'';
+  const addT=(x,type='special')=>{x=+x||0;if(x>0){stakeTotal+=x;if(type==='flat')flatStakeTotal+=x;else specialStakeTotal+=x}};
+  const addP=(lab,st,od,c=1,type='special')=>{const winStake=(+st||0)*(+c||0),p=winStake*(+od||0);if(p>0){payout+=p;if(type==='flat'){flatPayout+=p;flatWinStake+=winStake}else{specialPayout+=p;specialWinStake+=winStake}labels.push(lab)}};
+  const take=(re,fn)=>{work=work.replace(re,(...a)=>{try{fn(...a)}catch(e){console.warn('odds',e)}return ' '})};
+  // ===== 新增：平码（只看前6个正码，赔率7倍；不改变原有特码/平特逻辑） =====
+  // 支持：平码 06.15 17各50 / 平码5. 6 7 8各号50；各、个、每个、各号、每号同义。
+  take(/平码\s*((?:(?:0?[1-9]|[1-4]\d)[.\s\/+\-]*){1,49})\s*(?:各号|各数|个号|个数|每个|每号|各|个)\s*(\d+(?:\.\d+)?)\s*(?:米|元|块)?/g,(m,sel,st)=>{
+    st=+st;const a=nList(sel);if(!a.length||!st)return;
+    const bet=a.length*st;
+    stakeTotal+=bet;normalCodeStakeTotal+=bet;
+    if(draw)a.forEach(num=>{if(nset.has(num)){const p=st*7;payout+=p;normalCodePayout+=p;normalCodeWinStake+=st;labels.push('中平码'+num)}});
+  });
+  // 几不中
+  take(/([5-9]|10|11|12)不中\s*((?:(?:0?[1-9]|[1-4]\d)[.\s\/+\-]*){5,20})\s*(?:各|每组|每注)?\s*(\d+(?:\.\d+)?)\s*(?:米|元|块)?/g,(m,k,sel,st)=>{k=+k;st=+st;const a=nList(sel),bets=C(a.length,k);addT(bets*st);if(draw){const all=new Set([...normal,sp]);const safe=a.filter(x=>!all.has(x)).length,w=C(safe,k);if(w)addP(k+'不中',st,ODDS_MA.不中[k],w)}});
+  take(/((?:(?:0?[1-9]|[1-4]\d)[.\s\/+\-]*){5,20})\s*([5-9]|10|11|12)不中\s*(?:各|每组|每注)?\s*(\d+(?:\.\d+)?)\s*(?:米|元|块)?/g,(m,sel,k,st)=>{k=+k;st=+st;const a=nList(sel),bets=C(a.length,k);addT(bets*st);if(draw){const all=new Set([...normal,sp]);const safe=a.filter(x=>!all.has(x)).length,w=C(safe,k);if(w)addP(k+'不中',st,ODDS_MA.不中[k],w)}});
+  // 平码1中1 / 2中2 / 3中3
+  take(/平码\s*([123])中\1\s*((?:(?:0?[1-9]|[1-4]\d)[.\s\/+\-]*){1,20})\s*(?:各|每组|每注)?\s*(\d+(?:\.\d+)?)\s*(?:米|元|块)?/g,(m,k,sel,st)=>{k=+k;st=+st;const a=nList(sel),bets=C(a.length,k);addT(bets*st,'flat');if(draw){const h=a.filter(x=>nset.has(x)).length,w=C(h,k);if(w)addP('平码'+k+'中'+k,st,ODDS_MA.平码[k],w,'flat')}});
+  // 连肖
+  take(/([2-5])连肖\s*([鼠牛虎兔龙蛇马羊猴鸡狗猪]{2,12})\s*(?:各|每组|每注)?\s*(\d+(?:\.\d+)?)\s*(?:米|元|块)?/g,(m,k,zs,st)=>{k=+k;st=+st;const a=U(zList(zs));addT(C(a.length,k)*st,'flat');if(draw){const w=a.filter(z=>nz.has(z)),wc=w.length;if(wc>=k){const hm=w.includes('马')?C(wc-1,k-1):0,nm=C(wc-(w.includes('马')?1:0),k);if(hm)addP(k+'连肖带马',st,ODDS_MA.连肖带马[k],hm,'flat');if(nm)addP(k+'连肖',st,ODDS_MA.连肖普通[k],nm,'flat')}}});
+  // 平肖：重新学习指令。
+  // 支持：平特一肖鼠牛虎各200 / 平特鼠牛虎各200 / 平肖鼠牛虎各200 / 平虎500
+  // 中奖范围为6个平码 + 1个特码；特码生肖也算平肖中奖。
+  take(/(?:平特一肖|平特肖|平特|平肖|平)\s*([鼠牛虎兔龙蛇马羊猴鸡狗猪]{1,12})\s*(?:各|每肖|每注)?\s*(\d+(?:\.\d+)?)\s*(?:米|元|块)?/g,(m,zs,st)=>{st=+st;const a=zList(zs);addT(a.length*st,'flat');if(draw){a.forEach(z=>{if(allDrawZ.has(z))addP('中平特'+z,st,z==='马'?ODDS_MA.平特肖马:ODDS_MA.平特肖普通,1,'flat')})}});
+  // 新增：未明确写“各号/各数/每个号码”的生肖下注，按特肖统计。
+  // 例：蛇牛各10 = 蛇特肖10 + 牛特肖10；“牛羊各号10”仍按原来的号码下注，绝不进入特肖。
+  take(/(?<![平特肖])([鼠牛虎兔龙蛇马羊猴鸡狗猪]{1,12})(?:肖)?\s*(?:(?:各肖|各(?!号|数|码)|每肖|每注)\s*)?(\d+(?:\.\d+)?)\s*(?:米|元|块)?/g,(m,zs,st)=>{
+    st=+st;const a=zList(zs);if(!a.length||!st)return;
+    const bet=a.length*st;
+    addT(bet);
+    specialZodiacStakeTotal+=bet;
+    if(draw){
+      a.forEach(z=>{
+        if(z===sz){
+          const od=z==='马'?ODDS_MA.特肖马:ODDS_MA.特肖普通;
+          const p=st*od;
+          payout+=p;specialPayout+=p;specialZodiacPayout+=p;specialZodiacWinStake+=st;
+          labels.push('中特肖'+z);
+        }
+      });
+    }
+  });
+  // 特肖；四肖/五肖覆盖玩法
+  take(/特肖\s*([鼠牛虎兔龙蛇马羊猴鸡狗猪]{1,12})\s*(?:各|每肖|每注)?\s*(\d+(?:\.\d+)?)\s*(?:米|元|块)?/g,(m,zs,st)=>{st=+st;const a=zList(zs);if(a.length===4||a.length===5){addT(st);if(draw&&a.includes(sz))addP('特肖'+a.length+'肖',st,a.length===4?ODDS_MA.特肖四肖:ODDS_MA.特肖五肖)}else{addT(a.length*st);if(draw)a.forEach(z=>{if(z===sz)addP('特肖'+z,st,z==='马'?ODDS_MA.特肖马:ODDS_MA.特肖普通)})}});
+  take(/([45])肖\s*([鼠牛虎兔龙蛇马羊猴鸡狗猪]{4,5})\s*(?:各|每组|每注)?\s*(\d+(?:\.\d+)?)\s*(?:米|元|块)?/g,(m,k,zs,st)=>{k=+k;st=+st;const a=U(zList(zs)).slice(0,k);addT(st);if(draw&&a.includes(sz))addP(k+'肖',st,k===4?ODDS_MA.特肖四肖:ODDS_MA.特肖五肖)});
+  // ===== 新增：平特尾简写解析（不修改原有平特尾/连尾逻辑） =====
+  // 支持：平6尾 / 平5 6尾 / 平尾5 / 平尾65 / 平尾5.6 7 / 平5.6.7尾 / 平5。6尾。
+  // “个 / 每个 / 各”均表示每个尾数下注同一金额；每出现1个尾数即计1注。
+  // 中奖判断看6个平码+1个特码共7个框；所选尾数只要在7个开奖号码中出现即算中，赔率1.75。
+  const addSimpleFlatTail=(rawTs,st)=>{
+    st=+st;
+    const a=(String(rawTs||'').match(/\d/g)||[]);
+    if(!a.length||!st)return;
+    // 平特尾按尾数逐组计算：1个尾=1组；例如“平尾123各10”=3组×10=30。
+    addT(a.length*st,'flat');
+    if(draw){
+      const allTailSet=new Set([...normal,sp].filter(Boolean).map(x=>x[1]));
+      // 每个所选尾独立中奖：0尾赔率2倍，其它尾赔率1.75。
+      a.forEach(t=>{if(allTailSet.has(t))addP('中平特尾'+t,st,t==='0'?2:1.75,1,'flat')});
+    }
+  };
+  // 新增兼容：“平特6尾500 / 平特5 6尾100 / 平6尾100”。
+  // 尾字后直接跟金额时，前面的数字全部是尾数，后面的数字是整组下注金额。
+  take(/(?:平特|平)\s*([0-9](?:[.\s\/+\-]*[0-9])*)\s*尾\s*(?:每个|个|各|每尾|每注)?\s*(\d+(?:\.\d+)?)\s*(?:米|元|块)?/g,
+    (m,ts,st)=>addSimpleFlatTail(ts,st));
+  // 明确带“各/个/每个”等金额连接词的写法。
+  take(/(?:平尾\s*([0-9][0-9.\s\/+\-]{0,28})|平\s*([0-9][0-9.\s\/+\-]{0,28})\s*尾)\s*(?:每个|个|各|每尾|每注)\s*(\d+(?:\.\d+)?)\s*(?:米|元|块)?/g,
+    (m,ts1,ts2,st)=>addSimpleFlatTail(ts1||ts2,st));
+  // 不写连接词时，只接受“平尾 + 尾数 + 空格 + 金额”，例如：平尾5 一百。
+  take(/平尾\s*([0-9](?:[.\/+\-]*[0-9])*)\s+(\d+(?:\.\d+)?)\s*(?:米|元|块)?/g,
+    (m,ts,st)=>addSimpleFlatTail(ts,st));
+  // 平特尾 / 连尾
+  take(/平特尾\s*([0-9.\s\/+\-]{1,30})\s*(?:各|每尾|每注)?\s*(\d+(?:\.\d+)?)\s*(?:米|元|块)?/g,(m,ts,st)=>{st=+st;const a=tailList(ts);addT(a.length*st,'flat');if(draw)a.forEach(t=>{if(nt.has(t))addP('中平特尾'+t,st,t==='0'?ODDS_MA.平特尾0:ODDS_MA.平特尾普通,1,'flat')})});
+  take(/([2-5])连尾\s*([0-9.\s\/+\-]{2,30})\s*(?:各|每组|每注)?\s*(\d+(?:\.\d+)?)\s*(?:米|元|块)?/g,(m,k,ts,st)=>{k=+k;st=+st;const a=tailList(ts);addT(C(a.length,k)*st,'flat');if(draw){const w=a.filter(t=>nt.has(t)),wc=w.length;if(wc>=k){const h0=w.includes('0')?C(wc-1,k-1):0,n0=C(wc-(w.includes('0')?1:0),k);if(h0)addP(k+'连尾带0',st,ODDS_MA.连尾带0[k],h0,'flat');if(n0)addP(k+'连尾',st,ODDS_MA.连尾普通[k],n0,'flat')}}});
+  // 半波/半半波。明确“各号”的仍按原来的号码展开逻辑，不改变。
+  take(/(红|蓝|绿)(大|小|单|双)(?!\s*各号)\s*(?:各|每注)?\s*(\d+(?:\.\d+)?)\s*(?:米|元|块)?/g,(m,c,cond,st)=>{st=+st;const name=c+cond;addT(st);if(draw){if(sp==='49')addP(name+'和',st,1);else{const okColor=sc===c,okCond=cond==='大'?+sp>=25:cond==='小'?+sp<=24:cond==='单'?+sp%2===1:+sp%2===0;if(okColor&&okCond)addP(name,st,ODDS_MA.半波[name]||ODDS_MA.半波默认)}}});
+  // 波色。带“各号”时继续走原来的号码下注逻辑。
+  take(/(红|蓝|绿)波(?!\s*各号)\s*(?:各|每注)?\s*(\d+(?:\.\d+)?)\s*(?:米|元|块)?/g,(m,c,st)=>{st=+st;addT(st);if(draw&&sc===c)addP(c+'波',st,ODDS_MA.波色[c])});
+  // 六肖与两面（单双、大小、家野、天地肖）
+  take(/6肖\s*([鼠牛虎兔龙蛇马羊猴鸡狗猪]{6,12})\s*(?:各|每组|每注)?\s*(\d+(?:\.\d+)?)\s*(?:米|元|块)?/g,(m,zs,st)=>{st=+st;const a=U(zList(zs)).slice(0,6);addT(st);if(draw&&a.includes(sz))addP('六肖',st,ODDS_MA.两面)});
+  take(/(天肖|地肖|家肖|家禽|野肖|野兽|大数|小数|单数|双数|大|小|单|双|家|野)(?!\s*各号)\s*(?:各|每注)?\s*(\d+(?:\.\d+)?)\s*(?:米|元|块)?/g,(m,t,st)=>{st=+st;addT(st);if(!draw)return;let ok=false;if(t==='大'||t==='大数')ok=+sp>=25;else if(t==='小'||t==='小数')ok=+sp<=24;else if(t==='单'||t==='单数')ok=+sp%2===1;else if(t==='双'||t==='双数')ok=+sp%2===0;else if(t==='家'||t==='家肖'||t==='家禽')ok=['牛','羊','马','猪','狗','鸡'].includes(sz);else if(t==='野'||t==='野肖'||t==='野兽')ok=['猴','鼠','龙','蛇','虎','兔'].includes(sz);else if(t==='天肖')ok=['牛','兔','龙','马','猴','猪'].includes(sz);else if(t==='地肖')ok=['鼠','虎','蛇','羊','鸡','狗'].includes(sz);if(ok)addP(t,st,ODDS_MA.两面)});
+  return {stakeTotal,flatStakeTotal,specialStakeTotal,normalCodeStakeTotal,normalCodeWinStake,normalCodePayout,payout,flatPayout,specialPayout,flatWinStake,specialWinStake,specialZodiacStakeTotal,specialZodiacWinStake,specialZodiacPayout,labels,rest:work.replace(/\s+/g,' ').trim()};
+}
+parseBetTotal=function(raw){
+  // 连续“X头Y头 / X尾Y尾”没有金额时不是下注，不能把后一个数字误当金额。
+  const noStakeChain=/^\s*(?:澳门|香港)?\s*(?:(?:\d头){2,}|(?:\d尾){2,})\s*$/.test(toHalfWidth(String(raw||'')).replace(/[\u200B-\u200D\uFEFF]/g,''));
+  if(noStakeChain) return 0;
+  const mk=marketJudge(raw,null);
+  // “平码”单独一行的连续号码已经由 marketJudge 分行完整统计；
+  // 不再进入残余特码层，避免同一金额重复累计。
+  const rawPing=toHalfWidth(String(raw||'')).replace(/[\u200B-\u200D\uFEFF]/g,'').replace(/\r/g,'').replace(/^\s*(?:澳门|香港)\s*/,'');
+  if(/^\s*平码\s*\n/.test(rawPing)) return parseFloat((mk.stakeTotal||0).toFixed(4));
+  const residual=residualBetPartsV1(raw);
+  const specialTotal=Object.values(residual.specialMap).reduce((a,v)=>a+(+v||0),0);
+  return parseFloat((mk.stakeTotal+specialTotal+residual.legacyFlatTotal).toFixed(4));
+};
+
+function calcSimpleFlatZodiac(raw,draw){
+  if(!raw||!draw)return {winStake:0,payout:0};
+  const drawZ=new Set([
+    ...(draw.normal||[]).map(x=>x&&x.zodiac?simpZodiac(x.zodiac):zodiacOf(String(x.number).padStart(2,'0'))),
+    draw.special?(draw.special.zodiac?simpZodiac(draw.special.zodiac):zodiacOf(String(draw.special.number).padStart(2,'0'))):''
+  ].filter(Boolean));
+
+  const text=normMarket(raw);
+  const rx=/(?:平特一肖|平特肖|平特|平肖|平)\s*([鼠牛虎兔龙蛇马羊猴鸡狗猪]{1,12})\s*(?:各|每肖|每注)?\s*(\d+(?:\.\d+)?)\s*(?:米|元|块)?/g;
+  let m,winStake=0,payout=0;
+  while((m=rx.exec(text))){
+    const zs=zList(m[1]), st=+m[2]||0;
+    zs.forEach(z=>{
+      if(drawZ.has(z)){
+        winStake+=st;
+        payout+=st*(z==='马'?ODDS_MA.平特肖马:ODDS_MA.平特肖普通);
+      }
+    });
+  }
+  return {
+    winStake:parseFloat(winStake.toFixed(4)),
+    payout:parseFloat(payout.toFixed(4))
+  };
+}
+
+autoJudgeRows=function(){
+  if(!state.draw && !state.hkDraw)return;
+  state.rows.forEach(r=>{
+    if(!r.raw){
+      r.payout=0;r.flatPayout=0;r.specialPayout=0;
+      r.flatWinStake=0;r.specialWinStake=0;
+      r.specialZodiacWinStake=0;r.specialZodiacPayout=0;r.specialZodiacStake=0;
+      r.flatStake=0;r.specialStake=0;r.winDetail='';r.hit='';
+      return;
+    }
+
+    // 新增：同一序号中的澳门/香港子单分别使用对应开奖结果，再聚合到这一行。
+    if(Array.isArray(r.marketBlocks)&&r.marketBlocks.length){
+      let pay=0,flatPay=0,specialPay=0,flatWin=0,specialWin=0;
+      let specialZodiacWin=0,specialZodiacPay=0,specialZodiacStake=0;
+      let normalCodeStake=0,normalCodeWin=0,normalCodePay=0;
+      let flatStake=0,specialStake=0;
+      const marketWins={
+        HK:{special:0,flat:0,specialZodiac:0,normalCode:0},
+        MO:{special:0,flat:0,specialZodiac:0,normalCode:0}
+      };
+      r.marketBlocks.forEach(b=>{
+        const d=b.market==='HK'?state.hkDraw:state.draw;
+        const mk=marketJudge(b.raw,d||null);
+        const residual=residualBetPartsV1(b.raw);
+        const specialMap=residual.specialMap||{}, flatMap=residual.legacyFlatMap||{};
+        const legacySpecialStake=Object.values(specialMap).reduce((a,v)=>a+(+v||0),0);
+        const legacyFlatStake=residual.legacyFlatTotal||0;
+        flatStake+=(mk.flatStakeTotal||0)+legacyFlatStake;
+        normalCodeStake+=(mk.normalCodeStakeTotal||0);
+        specialStake+=Math.max(0,(b.amount||parseBetTotal(b.raw))-((mk.flatStakeTotal||0)+legacyFlatStake)-(mk.normalCodeStakeTotal||0));
+        if(d){
+          const sp=String(d.special&&d.special.number||'').padStart(2,'0');
+          const normals=(d.normal||[]).map(x=>String(x.number).padStart(2,'0'));
+          const sh=sp?(specialMap[sp]||0):0;
+          let fh=0;normals.forEach(x=>fh+=(flatMap[x]||0));
+          pay+=(mk.payout||0)+sh*47+fh*2;
+          specialPay+=(mk.specialPayout||0)+sh*47;
+          flatPay+=(mk.flatPayout||0)+fh*2;
+          specialWin+=(mk.specialWinStake||0)+sh;
+          flatWin+=(mk.flatWinStake||0)+fh;
+          specialZodiacWin+=(mk.specialZodiacWinStake||0);
+          specialZodiacPay+=(mk.specialZodiacPayout||0);
+          specialZodiacStake+=(mk.specialZodiacStakeTotal||0);
+          normalCodeWin+=(mk.normalCodeWinStake||0);
+          normalCodePay+=(mk.normalCodePayout||0);
+          const mw=marketWins[b.market==='HK'?'HK':'MO'];
+          mw.special+=(mk.specialWinStake||0)+sh;
+          mw.flat+=(mk.flatWinStake||0)+fh;
+          mw.specialZodiac+=(mk.specialZodiacWinStake||0);
+          mw.normalCode+=(mk.normalCodeWinStake||0);
+        }
+      });
+      const hitParts=[];
+      const marketHitText=(label,w)=>{
+        const p=[];
+        if(w.special>0)p.push('特'+fmt(w.special));
+        if(w.flat>0)p.push('平特'+fmt(w.flat));
+        if(w.specialZodiac>0)p.push('特肖'+fmt(w.specialZodiac));
+        if(w.normalCode>0)p.push('平码'+fmt(w.normalCode));
+        return p.length?label+'：'+p.join(' '):'';
+      };
+      const hkHit=marketHitText('港',marketWins.HK);
+      const moHit=marketHitText('澳',marketWins.MO);
+      if(hkHit)hitParts.push(hkHit);
+      if(moHit)hitParts.push(moHit);
+      r.payout=pay;r.flatPayout=flatPay;r.specialPayout=specialPay;
+      r.flatWinStake=flatWin;r.specialWinStake=specialWin;
+      r.specialZodiacWinStake=specialZodiacWin;r.specialZodiacPayout=specialZodiacPay;r.specialZodiacStake=specialZodiacStake;
+      r.normalCodeStake=normalCodeStake;r.normalCodeWinStake=normalCodeWin;r.normalCodePayout=normalCodePay;
+      r.flatStake=flatStake;r.specialStake=specialStake;
+      r.hit=hitParts.join(' ');
+      r.winDetail=r.hit;
+      return;
+    }
+    const activeDraw=drawForBet(r.raw);
+    if(!activeDraw){
+      r.payout=0;r.flatPayout=0;r.specialPayout=0;
+      r.flatWinStake=0;r.specialWinStake=0;r.specialZodiacWinStake=0;r.specialZodiacPayout=0;
+      r.hit='';r.winDetail='';
+      return;
+    }
+    const normalNums=new Set((activeDraw.normal||[]).map(x=>String(x.number).padStart(2,'0')));
+    const specialNum=activeDraw.special?String(activeDraw.special.number).padStart(2,'0'):'';
+
+    const mk=marketJudge(r.raw,activeDraw);
+    let pay=mk.payout||0, flatPay=mk.flatPayout||0, specialPay=mk.specialPayout||0;
+    let flatWin=mk.flatWinStake||0, specialWin=mk.specialWinStake||0;
+    let specialZodiacWin=mk.specialZodiacWinStake||0, specialZodiacPay=mk.specialZodiacPayout||0;
+
+    // 平肖中奖兜底：直接从原始下注文本读取，按接口返回的7个生肖（6平码+特码）判中。
+    // marketJudge 已正常结算时不重复；只在没有识别出平肖中奖时补上。
+    if(flatWin<=0){
+      const drawZ=new Set([
+        ...(activeDraw.normal||[]).map(x=>x&&x.zodiac?simpZodiac(x.zodiac):zodiacOf(String(x.number).padStart(2,'0'))),
+        activeDraw.special?(activeDraw.special.zodiac?simpZodiac(activeDraw.special.zodiac):zodiacOf(String(activeDraw.special.number).padStart(2,'0'))):''
+      ].filter(Boolean));
+      const rawNorm=normMarket(r.raw);
+      const rx=/(?:平特一肖|平特肖|平特|平肖|平)\s*([鼠牛虎兔龙蛇马羊猴鸡狗猪]{1,12})\s*(?:各|每肖|每注)?\s*(\d+(?:\.\d+)?)\s*(?:米|元|块)?/g;
+      let mm;
+      while((mm=rx.exec(rawNorm))){
+        const zs=zList(mm[1]), st=+mm[2]||0;
+        zs.forEach(z=>{
+          if(drawZ.has(z)){
+            flatWin+=st;
+            const od=z==='马'?ODDS_MA.平特肖马:ODDS_MA.平特肖普通;
+            const p=st*od;
+            pay+=p; flatPay+=p;
+          }
+        });
+      }
+    }
+
+    const residual=residualBetPartsV1(r.raw);
+    const specialMapV1=residual.specialMap;
+    const flatMapV1=residual.legacyFlatMap;
+    const legacySpecialStake=Object.values(specialMapV1||{}).reduce((a,v)=>a+(+v||0),0);
+    const legacyFlatStake=residual.legacyFlatTotal||0;
+    r.specialStake=(mk.specialStakeTotal||0)+legacySpecialStake;
+    r.flatStake=(mk.flatStakeTotal||0)+legacyFlatStake;
+
+    const sh=specialNum?(specialMapV1[specialNum]||0):0;
+    let fh=0;
+    normalNums.forEach(x=>fh+=(flatMapV1[x]||0));
+
+    if(sh>0){
+      const p=sh*47;
+      pay+=p;specialPay+=p;specialWin+=sh;
+    }
+    if(fh>0){
+      const p=fh*2;
+      pay+=p;flatPay+=p;flatWin+=fh;
+    }
+
+    // 强制校正简单“平特/平肖”结算，避免只显示中奖本金但发奖为0。
+    const simpleFlat=calcSimpleFlatZodiac(r.raw,activeDraw);
+    if(simpleFlat.winStake>0){
+      // marketJudge 已经算到时不重复；如果发奖缺失则补齐。
+      if(flatWin < simpleFlat.winStake) flatWin=simpleFlat.winStake;
+      if(flatPay < simpleFlat.payout){
+        const diff=simpleFlat.payout-flatPay;
+        flatPay=simpleFlat.payout;
+        pay+=diff;
+      }
+    }
+
+    r.payout=parseFloat(pay.toFixed(4));
+    r.flatPayout=parseFloat(flatPay.toFixed(4));
+    r.specialPayout=parseFloat(specialPay.toFixed(4));
+    r.flatWinStake=parseFloat(flatWin.toFixed(4));
+    r.specialWinStake=parseFloat(specialWin.toFixed(4));
+    r.specialZodiacWinStake=parseFloat(specialZodiacWin.toFixed(4));
+    r.specialZodiacPayout=parseFloat(specialZodiacPay.toFixed(4));
+    r.specialZodiacStake=parseFloat((mk.specialZodiacStakeTotal||0).toFixed(4));
+    r.normalCodeStake=parseFloat((mk.normalCodeStakeTotal||0).toFixed(4));
+    r.normalCodeWinStake=parseFloat((mk.normalCodeWinStake||0).toFixed(4));
+    r.normalCodePayout=parseFloat((mk.normalCodePayout||0).toFixed(4));
+
+    const parts=[];
+    if(specialWin>0)parts.push('特'+fmt(specialWin));
+    const isSimpleFlatTailRow=/(?:平特尾\s*[0-9]|平尾\s*[0-9]|平特\s*[0-9][0-9.\s\/+\-]*\s*尾|平\s*[0-9][0-9.\s\/+\-]*\s*尾)/.test(normMarket(r.raw||''));
+    if(flatWin>0)parts.push((isSimpleFlatTailRow?'平特尾':'平特')+fmt(flatWin));
+    if(specialZodiacWin>0)parts.push('特肖'+fmt(specialZodiacWin));
+    if((mk.normalCodeWinStake||0)>0)parts.push('平码'+fmt(mk.normalCodeWinStake));
+    r.hit=parts.join(' ');
+    r.winDetail=r.hit;
+  });
+};
+calc=function(){
+  // 所有已入账行（包括同一张单分出的澳门/香港两边）都必须累计进总数。
+  const total=state.rows.reduce((a,r)=>a+(n(r.amount)||0),0);
+  let specialBase=0,flatBase=0,autoPrize=0;
+  let flatPrizeAuto=0,specialPrizeAuto=0,flatWinTotal=0,specialWinTotal=0;
+  let specialZodiacWinTotal=0,specialZodiacPrizeAuto=0;
+  let normalCodeWinTotal=0,normalCodePrizeAuto=0;
+
+  state.rows.forEach(r=>{
+    // 每次计算特水前，按“本单解析总额 - 本单平特总额”重新核对特码下注总额。
+    // 这样不会受旧缓存或整段多行文本的号码映射重复影响。
+    if(r.raw && !(Array.isArray(r.marketBlocks)&&r.marketBlocks.length)){
+      const mkBase=marketJudge(r.raw,null);
+      const mapsBase=_oldParseBetMaps(mkBase.rest||'');
+      const legacyFlatBase=Object.values(mapsBase.flat||{}).reduce((a,v)=>a+(+v||0),0);
+      const exactFlatBase=(mkBase.flatStakeTotal||0)+legacyFlatBase;
+      const exactRowTotal=parseBetTotal(r.raw);
+      r.flatStake=exactFlatBase;
+      const exactNormalCodeBase=(mkBase.normalCodeStakeTotal||0);
+      r.normalCodeStake=exactNormalCodeBase;
+      r.specialStake=Math.max(0,exactRowTotal-exactFlatBase-exactNormalCodeBase);
+    }
+    // 兼容旧缓存：如果已经显示平特中奖，但旧数据没有保存发奖，现场重新结算。
+    const rowDraw=(r.raw && !(Array.isArray(r.marketBlocks)&&r.marketBlocks.length))?drawForBet(r.raw):null;
+    if(r.raw && rowDraw){
+      const sf=calcSimpleFlatZodiac(r.raw,rowDraw);
+      if(sf.winStake>0){
+        if((+r.flatWinStake||0)<sf.winStake)r.flatWinStake=sf.winStake;
+        if((+r.flatPayout||0)<sf.payout){
+          const oldFlat=+r.flatPayout||0;
+          const oldAll=+r.payout||0;
+          r.flatPayout=sf.payout;
+          r.payout=oldAll+(sf.payout-oldFlat);
+        }
+      }
+    }
+    specialBase+=(+r.specialStake||0);
+    flatBase+=(+r.flatStake||0);
+    autoPrize+=(+r.payout||0);
+    flatPrizeAuto+=(+r.flatPayout||0);
+    specialPrizeAuto+=(+r.specialPayout||0);
+    r.payout=(+r.specialPayout||0)+(+r.flatPayout||0)+(+r.normalCodePayout||0);
+    flatWinTotal+=(+r.flatWinStake||0);
+    specialWinTotal+=(+r.specialWinStake||0);
+    specialZodiacWinTotal+=(+r.specialZodiacWinStake||0);
+    specialZodiacPrizeAuto+=(+r.specialZodiacPayout||0);
+    normalCodeWinTotal+=(+r.normalCodeWinStake||0);
+    normalCodePrizeAuto+=(+r.normalCodePayout||0);
+  });
+
+  // 特水只按实际识别到的特码下注总额计算。
+  // 不再把未分类金额自动补进特码本金。
+
+  const sr=.04;
+  // 水统一按总数计算：总数 × 0.04；不再拆分特水/平特水。
+  const waterBase=total;
+  const specialRebate=Math.round(waterBase*sr),flatRebate=0;
+  const prize=specialPrizeAuto+flatPrizeAuto+normalCodePrizeAuto;
+  const profit=Math.round(total-specialRebate-prize);
+
+  $('#grandTotal').textContent=fmt(total);
+  $('#normalCodeWinDetail').textContent=fmt(normalCodeWinTotal)+'  发奖'+fmt(normalCodePrizeAuto);
+  $('#specialWinDetail').textContent=fmt(specialWinTotal)+'  发奖'+fmt(specialPrizeAuto-specialZodiacPrizeAuto);
+  $('#specialZodiacWinDetail').textContent=fmt(specialZodiacWinTotal)+'  发奖'+fmt(specialZodiacPrizeAuto);
+  let flatTailWinDisplay=0,flatTailPrizeDisplay=0;
+  state.rows.forEach(r=>{
+    if(/平特尾/.test(String(r.hit||r.winDetail||''))){
+      flatTailWinDisplay+=(+r.flatWinStake||0);
+      flatTailPrizeDisplay+=(+r.flatPayout||0);
+    }
+  });
+  const flatOnlyWinDisplay=Math.max(0,flatWinTotal-flatTailWinDisplay);
+  const flatOnlyPrizeDisplay=Math.max(0,flatPrizeAuto-flatTailPrizeDisplay);
+  $('#flatWinDetail').textContent=fmt(flatOnlyWinDisplay)+'  发奖'+fmt(flatOnlyPrizeDisplay);
+  $('#flatTailWinDetail').textContent=fmt(flatTailWinDisplay)+'  发奖'+fmt(flatTailPrizeDisplay);
+  $('#specialRebateDetail').textContent=`${fmt(total)}×0.04=${fmt(specialRebate)}`;
+  $('#flatRebateDetail').textContent='0';
+  $('#cTotal').textContent=fmt(total);
+  $('#cSpecRebate').textContent=fmt(specialRebate);
+  $('#cFlatRebate').textContent=fmt(flatRebate);
+  $('#cPrize').textContent=fmt(prize);
+  const profitBox=$('#cProfit').closest('.profit');
+  const profitLabel=profitBox.querySelector('.label');
+  $('#cProfit').textContent=fmt(profit);
+  profitBox.style.display='block';
+  profitLabel.style.visibility=profit>0?'visible':'hidden';
+  profitLabel.style.color=profit>0?'var(--red)':'';
+  requestAnimationFrame(fitSheet)
+};
+
+
+
+// ===== 只修改：直接使用 macaujc.com 官方“开奖调用”页面公布的最新一期接口 =====
+// 官方开奖调用页面公布：GET https://macaumarksix.com/api/macaujc2.com
+const DIRECT_DRAW_API = 'https://macaumarksix.com/api/macaujc2.com';
+
+function strictValidDraw(d){
+  if(!d || !Array.isArray(d.normal) || d.normal.length!==6 || !d.special) return false;
+  const nums=[...d.normal.map(x=>String(x.number||'').padStart(2,'0')),String(d.special.number||'').padStart(2,'0')];
+  if(nums.some(x=>!/^(0[1-9]|[1-4][0-9])$/.test(x))) return false;
+  if(new Set(nums).size!==7) return false;
+  return true;
+}
+function simpZodiac(z){
+  return String(z||'')
+    .replace(/龍/g,'龙').replace(/雞/g,'鸡').replace(/豬/g,'猪').replace(/馬/g,'马');
+}
+function parseOfficialLatest(j){
+  // 官方接口示例响应为数组：[ { expect, openCode, openTime, zodiac, ... } ]
+  let row=j;
+  if(Array.isArray(row)) row=row[0];
+  if(row && Array.isArray(row.data)) row=row.data[0];
+  if(!row || typeof row!=='object') throw new Error('接口返回格式为空');
+
+  const rawNums=Array.isArray(row.openCode)
+    ? row.openCode
+    : String(row.openCode||row.code||row.result||'').split(/[,\s|]+/).filter(Boolean);
+
+  const nums=rawNums.map(x=>String(parseInt(x,10)).padStart(2,'0')).filter(x=>/^(0[1-9]|[1-4][0-9])$/.test(x));
+  if(nums.length!==7) throw new Error('接口没有返回完整7个号码');
+
+  let zs=[];
+  if(Array.isArray(row.zodiac)) zs=row.zodiac;
+  else if(row.zodiac!=null) zs=String(row.zodiac).split(/[,\s|]+/).filter(Boolean);
+  zs=zs.map(simpZodiac);
+
+  const d={
+    date: String(row.openTime||row.date||'').trim(),
+    period: row.expect ? ('第'+String(row.expect)+'期') : '新开',
+    normal: nums.slice(0,6).map((number,i)=>({number,zodiac:zs[i]||zodiacOf(number)})),
+    special: {number:nums[6],zodiac:zs[6]||zodiacOf(nums[6])}
+  };
+  if(!strictValidDraw(d)) throw new Error('开奖号码异常或重复');
+  return d;
+}
+async function fetchOfficialLatest(){
+  const tries=[
+    DIRECT_DRAW_API,
+    'https://api.allorigins.win/raw?url='+encodeURIComponent(DIRECT_DRAW_API),
+    'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(DIRECT_DRAW_API)
+  ];
+  let last='';
+  for(const url of tries){
+    try{
+      const r=await fetch(url,{cache:'no-store'});
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      const raw=await r.text();
+      let j;
+      try{ j=JSON.parse(raw); }
+      catch(e){ throw new Error('接口返回的不是JSON'); }
+      return parseOfficialLatest(j);
+    }catch(e){
+      last=String(e.message||e);
+    }
+  }
+  throw new Error(last||'接口读取失败');
+}
+function clearBadCachedDraw(){
+  if(state.draw && !strictValidDraw(state.draw)){
+    state.draw=null;
+    try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){}
+  }
+}
+async function refreshDrawSafe(){
+  status('正在读取最新期开奖…');
+  try{
+    const d=await fetchOfficialLatest();
+    state.draw=d;
+    autoJudgeRows();
+    save('开奖已更新');
+    renderDraw();renderTable();calc();fitSheet();
+  }catch(e){
+    // 失败时不制造假开奖；保留上一次合法数据。
+    if(state.draw && !strictValidDraw(state.draw)) state.draw=null;
+    renderDraw();renderTable();calc();fitSheet();
+    status('开奖未读取：'+String(e.message||e).slice(0,50));
+    console.warn('官方开奖接口读取失败',e);
+  }
+}
+
+
+
+
+// ===== 新增：香港赛马会六合彩开奖结果（独立于原开奖接口） =====
+const HKJC_MARKSIX_API='https://info.cld.hkjc.com/graphql/base/';
+const HKJC_MARKSIX_QUERY=`fragment lotteryDrawsFragment on LotteryDraw {
+id
+year
+no
+openDate
+closeDate
+drawDate
+status
+snowballCode
+snowballName_en
+snowballName_ch
+lotteryPool {
+sell
+status
+totalInvestment
+jackpot
+unitBet
+estimatedPrize
+derivedFirstPrizeDiv
+lotteryPrizes {
+type
+winningUnit
+dividend
+}
+}
+drawResult {
+drawnNo
+xDrawnNo
+}
+}
+query marksixResult($lastNDraw: Int, $startDate: String, $endDate: String, $drawType: LotteryDrawType) {
+lotteryDraws(
+lastNDraw: $lastNDraw
+startDate: $startDate
+endDate: $endDate
+drawType: $drawType
+) {
+...lotteryDrawsFragment
+}
+}`;
+function parseHkjcMarkSix(j){
+  const list=j&&j.data&&j.data.lotteryDraws;
+  if(!Array.isArray(list)||!list.length)throw new Error('香港赛马会没有返回开奖');
+  const d=list.find(x=>x&&x.drawResult&&Array.isArray(x.drawResult.drawnNo)&&x.drawResult.drawnNo.length>=6&&x.drawResult.xDrawnNo!=null);
+  if(!d)throw new Error('香港赛马会最新一期尚未有完整结果');
+  const nums=[...d.drawResult.drawnNo.slice(0,6),d.drawResult.xDrawnNo];
+  const out=makeDraw(nums,d.drawDate||d.openDate||'',`${d.year||''}/${String(d.no||'').padStart(3,'0')}`);
+  out.source='HKJC';
+  return out;
+}
+async function fetchHkDraw(){
+  const r=await fetch(HKJC_MARKSIX_API,{
+    method:'POST',cache:'no-store',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({operationName:'marksixResult',variables:{lastNDraw:3},query:HKJC_MARKSIX_QUERY})
+  });
+  if(!r.ok)throw new Error('香港赛马会 HTTP '+r.status);
+  return parseHkjcMarkSix(await r.json());
+}
+async function refreshHkDraw(){
+  try{
+    const d=await fetchHkDraw();
+    state.hkDraw=d;
+    autoJudgeRows();
+    save('香港开奖已更新');
+    renderHkDraw();renderTable();calc();fitSheet();
+    return true;
+  }catch(e){
+    renderHkDraw();
+    console.warn('香港赛马会开奖读取失败',e);
+    return false;
+  }
+}
+const _refreshDrawSafeOriginal=refreshDrawSafe;
+refreshDrawSafe=async function(){
+  status('正在读取开奖及香港开奖…');
+  await Promise.allSettled([_refreshDrawSafeOriginal(),refreshHkDraw()]);
+  autoJudgeRows();renderDraw();renderHkDraw();renderTable();calc();fitSheet();
+};
+
+// ===== 新增：解析预览逻辑（只读输入，不写入 state，不修改正式解析） =====
+(function(){
+  function previewTotalAbsV1(changes){return changes.reduce((s,x)=>s+Math.abs(x.delta),0);}
+  function previewParseAddonV1(raw){
+    raw=(raw||'').trim();
+    if(!raw) return {text:'输入内容后这里显示预计识别结果'};
+    let input=raw.trim();
+    const isSubtract=/^减\s*/.test(input);
+    input=input.replace(/^减\s*/,'');
+    input=specialPreprocessV1(input);
+    const sign=isSubtract?-1:1;
+    const temp=Object.fromEntries(numbers.map(n=>[n,0]));
+    // 仅用于预览“预计号码个数”：同一号码重复解析时也重复计数
+    let parsedNumberCount=0;
+    const apply=(num,delta)=>{ if(numbers.includes(num)){ temp[num]+=delta; parsedNumberCount++; } };
+
+    const regex=/(\d+(?:[ ,.+\-~=%\/”]+\d{1,2})*)\s*(?:各号码买|每个号码买|各号码|每个号码|肖个号|肖个数|肖各号|各号|各数|个号|个数|码各|码个|一个买|一个|每个|每号|各|个)(\d+(?:\.\d+)?)|([一-龥]+)\s*(?:号)?(?:各号码买|每个号码买|各号码|每个号码|肖个号|肖个数|肖各号|各号|各数|个号|个数|码各|码个|一个买|一个|每个|每号|各|个)(\d+(?:\.\d+)?)(?:[快块米])?/g;
+    let m;
+    while((m=regex.exec(input))!==null){
+      if(m[1]&&m[2]){
+        const list=m[1].split(/[ ,.\/+、，。;；:：|\-~=%\”]+/).map(n=>n.padStart(2,'0')).filter(n=>numbers.includes(n));
+        const amt=parseFloat(m[2]); list.forEach(n=>apply(n,sign*amt));
+      }else if(m[3]&&m[4]){
+        const amt=parseFloat(m[4]); m[3].split('').forEach(z=>{ if(zodiacNumbers[z]) zodiacNumbers[z].forEach(n=>apply(n,sign*amt)); });
+      }
+    }
+    const colorRegex=/(红|蓝|绿)波\s*(?:各号|各数|个号|号个|个数|数个|数各|号各|各号码|各号码买|每个号码|每个号码买)\s*(\d+(?:\.\d+)?)/g;
+    while((m=colorRegex.exec(input))!==null){ colorMap[m[1]].forEach(n=>apply(n,sign*parseFloat(m[2]))); }
+    const multiColorRegex=/((?:红|蓝|绿){2,})\s*(?:各号|各数|个号|号个|个数|数个|数各|号各|各号码|各号码买|每个号码|每个号码买)\s*(\d+(?:\.\d+)?)/g;
+    while((m=multiColorRegex.exec(input))!==null){ m[1].split('').forEach(c=>{ if(colorMap[c]) colorMap[c].forEach(n=>apply(n,sign*parseFloat(m[2]))); }); }
+    const colorOddEvenRegex=/(红|蓝|绿)(波)?(单|双)\s*(?:各号)?\s*(\d+(?:\.\d+)?)/g;
+    while((m=colorOddEvenRegex.exec(input))!==null){ colorMap[m[1]].filter(n=>m[3]==='单'?parseInt(n)%2===1:parseInt(n)%2===0).forEach(n=>apply(n,sign*parseFloat(m[4]))); }
+    const homeAnimalsRegex=/(家肖|家禽)\s*各?号?(\d+(?:\.\d+)?)/g;
+    while((m=homeAnimalsRegex.exec(input))!==null){ ['牛','羊','马','猪','狗','鸡'].forEach(z=>zodiacNumbers[z].forEach(n=>apply(n,sign*parseFloat(m[2])))); }
+    const wildAnimalsRegex=/(野兽|野肖)\s*各?号?(\d+(?:\.\d+)?)/g;
+    while((m=wildAnimalsRegex.exec(input))!==null){ ['猴','鼠','龙','蛇','虎','兔'].forEach(z=>zodiacNumbers[z].forEach(n=>apply(n,sign*parseFloat(m[2])))); }
+    const numberEachRegex=/((?:\d{1,2}|[一-龥])+(?:[ ,.+\-~=%\/”、，。;；:：|]?)+(?:\d{1,2}|[一-龥])+?)\s*数个\s*(\d+(?:\.\d+)?)/g;
+    while((m=numberEachRegex.exec(input))!==null){
+      const amt=parseFloat(m[2]); m[1].split(/[ ,.\/+、，。;；:：|\-~=%\”]+/).forEach(e=>{
+        const n=e.padStart(2,'0'); if(numbers.includes(n)) apply(n,sign*amt); else if(zodiacNumbers[e]) zodiacNumbers[e].forEach(x=>apply(x,sign*amt)); else if(colorMap[e]) colorMap[e].forEach(x=>apply(x,sign*amt));
+      });
+    }
+    const specialGroupsLocal={
+      '大单':numbers.filter(n=>parseInt(n)>=25&&parseInt(n)%2===1),'小单':numbers.filter(n=>parseInt(n)<=24&&parseInt(n)%2===1),
+      '大双':numbers.filter(n=>parseInt(n)>=25&&parseInt(n)%2===0),'小双':numbers.filter(n=>parseInt(n)<=24&&parseInt(n)%2===0)
+    };
+    const specialRegex=/(大单|小单|大双|小双)\s*(?:各号|各数|号各|数各|个号|各号码|各号码买|每个号码|每个号码买)?\s*(\d+(?:\.\d+)?)/g;
+    while((m=specialRegex.exec(input))!==null){ specialGroupsLocal[m[1]].forEach(n=>apply(n,sign*parseFloat(m[2]))); }
+    const comboRegex=/((?:大单|小单|大双|小双){2,})\s*(?:各号|各数|号各|数各|个号|各号码|各号码买|每个号码|每个号码买)?\s*(\d+(?:\.\d+)?)/g;
+    while((m=comboRegex.exec(input))!==null){ (m[1].match(/大单|小单|大双|小双/g)||[]).forEach(p=>specialGroupsLocal[p].forEach(n=>apply(n,sign*parseFloat(m[2])))); }
+
+    const changes=numbers.filter(n=>Math.abs(temp[n])>1e-9).map(n=>({num:n,delta:temp[n]}));
+    // 预览金额直接调用正式“解析入账”使用的金额解析函数，
+    // 保证预览金额与真正写入该单的下注总额一致。
+    // 预览金额与正式“解析入账”完全共用同一套盘口分流与金额汇总。
+    // 港澳双边会计算两份；单独港/澳、前置/后置盘口均与实际入账一致。
+    const previewBlocks=splitMarketBlocksV1(raw).map(b=>({...b,amount:parseBetTotal(b.raw)})).filter(b=>b.amount>0);
+    const total=previewBlocks.reduce((sum,b)=>sum+b.amount,0);
+    const unknown=detectUnrecognizedContent(raw);
+    if(!changes.length){
+      return {text:`暂未识别到有效下注内容${unknown ? `｜⚠ 未识别：${unknown}` : ''}`};
+    }
+    // 仅改变预览数量的显示口径：平特按原文实际出现的生肖个数显示；
+    // 重复生肖重复计数。普通特码仍按实际解析到的号码次数显示。
+    // 平特预览按“原文实际写出的生肖次数”计数，重复生肖也重复计数。
+    // 同时兼容：平 牛牛羊 / 平特\n牛牛羊 / 平特牛牛羊。
+    const flatRaw = String(raw||'').replace(/\r/g,'');
+    // 预览数量：累计原文中所有“平特/平 + 生肖”组；重复生肖也按实际出现次数累计。
+    // 只改变预览数量显示，不参与正式金额、下注或结算。
+    let flatZodiacCount=0, flatPreviewMatch;
+    const flatPreviewRe=/(?:平特|平)\s*([鼠牛虎兔龙蛇马羊猴鸡狗猪]+)/g;
+    while((flatPreviewMatch=flatPreviewRe.exec(flatRaw))!==null){
+      flatZodiacCount+=(flatPreviewMatch[1].match(/[鼠牛虎兔龙蛇马羊猴鸡狗猪]/g)||[]).length;
+    }
+    // 平特尾预览：按实际选择的尾数个数显示，1个尾=1个号码。
+    const flatTailRaw=normMarket(String(raw||''));
+    let flatTailCount=0;
+    const flatTailPreviewMatch=flatTailRaw.match(/(?:(?:平特|平)\s*([0-9](?:[.\s\/+\-]*[0-9])*)\s*尾|平尾\s*([0-9](?:[.\s\/+\-]*[0-9])*))/);
+    if(flatTailPreviewMatch){
+      flatTailCount=((flatTailPreviewMatch[1]||flatTailPreviewMatch[2]||'').match(/\d/g)||[]).length;
+    }
+    const countText = flatTailCount > 0 ? `${flatTailCount} 个号码` : (flatZodiacCount > 0 ? `${flatZodiacCount} 个生肖` : `${parsedNumberCount} 个号码`);
+    return {text: `预计 ${countText}｜金额合计 ${formatBetAmount(total)}${unknown ? `｜⚠ 未识别：${unknown}` : '｜全部识别'}`};
+  }
+
+  // ===== 未识别内容提示层 v3：保守检测，只报高确定性的未知内容 =====
+  // 原则：宁可少报，也不把已经被正式下注规则成功识别的内容误报。
+  function detectUnrecognizedContent(raw){
+    raw=(raw||'').trim();
+    if(!raw) return '';
+
+    const parts=[];
+    const src=toHalfWidth(raw);
+
+    // 1) 当前明确不支持斜杠金额写法，因此原样提示；这里只提示，绝不参与下注。
+    const slashRe=/(?:^|[\s，,。;；|])((?:\d{1,2}\s*\/\s*)+\d+(?:\.\d+)?\s*(?:米|元|块钱|块)?)(?=\s|[，,。;；|]|$)/g;
+    let sm;
+    while((sm=slashRe.exec(src))!==null){
+      const piece=(sm[1]||'').replace(/\s+/g,'');
+      if(piece && !parts.includes(piece)) parts.push(piece);
+    }
+
+    // 1.1) 高确定性漏算提示：
+    // “44号10米”这类【单号 + 金额 + 单位】目前正式解析器不会下注，
+    // 不能因为“号/米/数字”都是已知字符就误显示“全部识别”。
+    // 这里只做提示，不参与下注，也不改变 20号5、1号17号各5 等原有规则。
+    const unsupportedNumHaoUnitRe=/(?:^|[\s，,。;；|#])((?:0?[1-9]|[1-4]\d)\s*号\s*[零一二三四五六七八九十百千0-9]+(?:\.[0-9]+)?\s*(?:米|元|块钱|块))(?=\s|[，,。;；|#]|[鼠牛虎兔龙蛇马羊猴鸡狗猪红蓝绿]|$)/g;
+    let uh;
+    while((uh=unsupportedNumHaoUnitRe.exec(src))!==null){
+      const piece=(uh[1]||'').replace(/\s+/g,'');
+      if(piece && !parts.includes(piece)) parts.push(piece);
+    }
+
+    // 1.2) 多个“号码+号”连写后再“各金额+单位”的漏算提示。
+    // 例：35号47号各20米。当前正式解析在这种带金额单位且与前一笔紧连时可能漏算，
+    // 因此这里只提示，不参与下注。
+    const unsupportedMultiHaoRe=/(?:^|[\s，,。;；|#]|(?:米|元|块钱|块))(((?:(?:0?[1-9]|[1-4]\d)\s*号\s*){2,})各(?:号)?\s*[零一二三四五六七八九十百千0-9]+(?:\.[0-9]+)?\s*(?:米|元|块钱|块))(?=\s|[，,。;；|#]|$)/g;
+    let mh;
+    while((mh=unsupportedMultiHaoRe.exec(src))!==null){
+      const piece=(mh[1]||'').replace(/\s+/g,'');
+      if(piece && !parts.includes(piece)) parts.push(piece);
+    }
+
+    // 1.3) 通用“数字下注动作词”漏算提示。
+    // 正式预处理目前会删除 下/投/压/下注/各下，而不是把它们转换成“各号”，
+    // 因此像 29下18米、01 02下5米 可能看起来像下注但实际没有统计。
+    // 这里只把原文片段提示出来，绝不参与下注。
+    const unsupportedActionBetRe=/(?:^|[\s，,。;；|#])((?:(?:0?[1-9]|[1-4]\d)(?:\s*(?:号)?\s*[.,，。+\-、]\s*|\s+))*?(?:0?[1-9]|[1-4]\d)\s*(?:下注|各下|下|投|压)\s*[零一二三四五六七八九十百千0-9]+(?:\.[0-9]+)?\s*(?:米|元|块钱|块)?)(?=\s|[，,。;；|#]|$)/g;
+    let ab;
+    while((ab=unsupportedActionBetRe.exec(src))!==null){
+      const piece=(ab[1]||'').replace(/\s+/g,'');
+      if(piece && !parts.includes(piece)) parts.push(piece);
+    }
+
+
+    // 2) 只检查“陌生文字”。所有已经支持的下注关键词、生肖、金额中文数字和单位都先移除。
+    //    这样诸如 各/各号/各数/号各/个号/各号码/每个号码/米/元 等成功格式不会被误报。
+    let text=src;
+
+    // 聊天时间前缀只在后面紧跟明确下注表达时忽略；只影响提示层，不参与金额。
+    // 例：今晚买1头各号10 -> “今晚”不再被误报。
+    text=text.replace(/(?:今晚|今天|明天|现在)\s*(?=买?\s*(?:\d+\s*(?:头|尾)|[鼠牛虎兔龙蛇马羊猴鸡狗猪]|\d{1,2}(?:\s*号)?))/g,' ');
+
+    // 预览提示层同步正式盘口别名：这些词是已支持的盘口标记，不应提示“未识别”。
+    // 只影响未识别提示，不参与金额、分流或结算。
+    text=text.replace(/(?:香港澳门|澳门香港|香港奥门|奥门香港|港\s*澳|澳\s*港|港\s*奥|奥\s*港|新澳|新奥|澳门|奥门|香港|港|香|澳|奥|门|新|减)/g,' ');
+    text=text.replace(/(?:下注|各下|投|压|下|买|包肖|包销)/g,' ');
+
+    // v4修复：必须先清理完整特殊关键词，再清理“号/数/各”等通用字。
+    // 否则“单数”会先被删掉“数”只剩“单”，“小数”会只剩“小”，造成假未识别提示。
+    text=text.replace(/(?:家肖|家禽|野兽|野肖|大单|小单|大双|小双|大数|小数|红单|红双|蓝单|蓝双|绿单|绿双|红蓝绿|红蓝|红绿|蓝绿|红波|蓝波|绿波|单数|双数|头|尾|特码|平|特)/g,' ');
+    text=text.replace(/(?:每个号码买|每个号码|各号码买|各号码|各号买|各号各|各各|各个|各号|各数|个数|号各|数各|个号|号个|每个|每号|每码|每肖|每只|各个|各只|各|个|号|数|码|肖)/g,' ');
+    text=text.replace(/[鼠牛虎兔龙蛇马羊猴鸡狗猪红蓝绿]/g,' ');
+    text=text.replace(/[零一二三四五六七八九十百千万两]/g,' ');
+    text=text.replace(/(?:元|块钱|块|米|快)/g,' ');
+
+    // 移除数字及各种常见分隔符。斜杠金额已经在上面单独记录，不在这里重复提示。
+    text=text.replace(/[0-9\s，。,.、:：;；|#+\-~=%\/”()（）【】\[\]]+/g,' ').trim();
+
+    // 剩余的中文/字母才算高确定性的“陌生文字”。
+    if(text){
+      text.split(/\s+/).filter(Boolean).forEach(x=>{
+        if(!parts.includes(x)) parts.push(x);
+      });
+    }
+
+    if(!parts.length) return '';
+    let out=parts.join('、');
+    if(out.length>40) out=out.slice(0,40)+'…';
+    return out;
+  }
+
+
+  function refreshParsePreviewV1(){
+    const el=document.getElementById('pasteBox'), out=document.getElementById('previewText');
+    if(!el||!out)return;
+    if(!el.value.trim()){out.textContent='输入内容后这里显示预计识别结果';return;}
+    try{
+      const text=previewParseAddonV1(el.value).text;
+      const escape=v=>String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+      if(text.includes('⚠ 未识别：')){
+        const i=text.indexOf('⚠ 未识别：');
+        out.innerHTML=escape(text.slice(0,i))+'<span class="unrecognized-warning">'+escape(text.slice(i))+'</span>';
+      }else if(text.includes('全部识别')){
+        out.innerHTML=escape(text.replace('全部识别',''))+'<span class="recognized-ok">全部识别</span>';
+      }else out.textContent=text;
+    }catch(e){out.textContent='预览暂时无法识别，但不会影响正式解析入账';}
+  }
+  const el=document.getElementById('pasteBox');
+  let previewTimerV1=0;
+  function scheduleParsePreviewV1(){
+    clearTimeout(previewTimerV1);
+    const value=el?el.value:'';
+    // 大量粘贴时不在每次 input 事件里同步跑完整预览，避免手机主线程卡死。
+    // 正式“解析入账”仍使用原完整解析逻辑，不减少、不跳过任何下注内容。
+    if(value.length>3000 || (value.match(/\n/g)||[]).length>80){
+      const out=document.getElementById('previewText');
+      if(out)out.textContent='内容较多，已暂停实时预览；点击“解析入账”仍会完整解析';
+      return;
+    }
+    previewTimerV1=setTimeout(refreshParsePreviewV1,180);
+  }
+  if(el)el.addEventListener('input',scheduleParsePreviewV1);
+  const btn=document.getElementById('importBtn');
+  if(btn)btn.addEventListener('click',()=>setTimeout(refreshParsePreviewV1,0));
+  window.refreshParsePreviewV1=refreshParsePreviewV1;
+})();
+
+$('#refreshDraw').onclick=refreshDrawSafe;
+load();
+clearBadCachedDraw();
+if(state.draw||state.hkDraw)autoJudgeRows();
+renderDraw();renderHkDraw();renderTable();calc();
+setTimeout(refreshDrawSafe,300);
+</script>
+
+<script>
+(function(){
+  const MODE_KEY='lottery_last_mode_v1';
+  const SKIP_AUTO_KEY='lottery_skip_auto_redirect_once_v1';
+  const LIANXIAO_NOTICE_KEY='lottery_lianxiao_notice_once_v1';
+  const B_FILE='lianxiao.html';
+  try{
+    const skip=sessionStorage.getItem(SKIP_AUTO_KEY)==='1';
+    if(skip)sessionStorage.removeItem(SKIP_AUTO_KEY);
+    const last=localStorage.getItem(MODE_KEY);
+    if(!skip && last==='lianxiao'){ location.replace(B_FILE); return; }
+    localStorage.setItem(MODE_KEY,'normal');
+  }catch(e){}
+  const btn=document.getElementById('switchToLianxiaoBtn');
+  if(btn)btn.addEventListener('click',function(){
+    const msg='注意连肖标准格式否则可能无法准确解析\n支持三中 二中 复试 等格式需要自行测试\n技术支持联系QQ 284888125';
+    let show=true;
+    try{ show=sessionStorage.getItem(LIANXIAO_NOTICE_KEY)!=='1'; }catch(e){}
+    if(show){ alert(msg); try{sessionStorage.setItem(LIANXIAO_NOTICE_KEY,'1')}catch(e){} }
+    try{localStorage.setItem(MODE_KEY,'lianxiao')}catch(e){}
+    location.href=B_FILE;
+  });
+})();
+</script>
+</body></html>
